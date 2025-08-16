@@ -2,45 +2,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>地図記号5択ドリル — SVG版</title>
-  <meta name="description" content="中学生向け：地図記号を5択で覚えるスマホ用WEBアプリ（SVG画像読み込み対応版）。GitHub Pagesで公開しやすい単一HTML。" />
+  <title>地図記号5択ドリル — 文字版（タップで次へ）</title>
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <style>
     :root{ --bg:#0b0f14; --panel:#0f1520; --ink:#e6edf3; --muted:#9aa4b2; --accent:#60a5fa; --ok:#22c55e; --ng:#ef4444; --btn:#1f2937; --btn2:#111827; --card:#0f172a; --shadow:0 10px 30px rgba(0,0,0,.25); }
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;}
-    #wrap{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;overscroll-behavior:none}
+    #wrap{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto;max-height:100dvh}
     header,footer{background:var(--panel);padding:10px env(safe-area-inset-right,12px) 10px env(safe-area-inset-left,12px);border-bottom:1px solid #1f2937}
     footer{border-top:1px solid #1f2937;border-bottom:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     header h1{margin:0;font-size:18px;letter-spacing:.02em}
-    header .sub{font-size:12px;color:var(--muted)}main{overflow:auto;padding:14px}
-.board{max-width:680px;margin:0 auto;display:grid;gap:14px}
+    header .sub{font-size:12px;color:var(--muted)}main{overflow:hidden;padding:10px}
+.board{max-width:640px;margin:0 auto;display:grid;gap:10px;height:100%}
 
-.card{background:var(--card);border:1px solid #1f2937;border-radius:16px;box-shadow:var(--shadow);padding:14px}
+.card{background:var(--card);border:1px solid #1f2937;border-radius:16px;box-shadow:var(--shadow);padding:12px}
 .flex{display:flex;gap:12px;align-items:center}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.stat{background:var(--btn2);padding:10px;border-radius:12px;text-align:center;border:1px solid #1f2937}
-.stat .v{font-size:18px;font-weight:700}
+.stat{background:var(--btn2);padding:8px;border-radius:12px;text-align:center;border:1px solid #1f2937}
+.stat .v{font-size:16px;font-weight:700}
 .stat .k{font-size:11px;color:var(--muted)}
 
-.q-symbol{display:grid;place-items:center;height:240px;border-radius:16px;background:linear-gradient(180deg,#0d1625,#0b1220);border:1px solid #1e293b}
-.glyph{font-size:110px;line-height:1}
-.imgSym{width:170px;height:170px;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.35))}
-.q-meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;margin-top:6px}
+/* 1画面に収まるよう高さを調整 */
+#quizCard{display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;min-height:0}
+.q-symbol{display:grid;place-items:center;height:clamp(160px,36vh,320px);border-radius:16px;background:linear-gradient(180deg,#0d1625,#0b1220);border:1px solid #1e293b}
+.glyph{font-size:clamp(72px,14vh,120px);line-height:1}
+.q-meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;margin-top:4px}
 
-.choices{display:grid;gap:10px}
-@media(min-width:520px){.choices{grid-template-columns:repeat(2,1fr)}}
-.choice{border:1px solid #1f2937;background:var(--btn);color:var(--ink);padding:14px;border-radius:14px;text-align:left;font-size:16px;display:flex;gap:10px;align-items:center;position:relative;min-height:54px}
+.choices{display:grid;gap:8px;grid-template-columns:1fr 1fr}
+@media(min-width:560px){.choices{grid-template-columns:1fr 1fr}}
+.choice{border:1px solid #1f2937;background:var(--btn);color:var(--ink);padding:12px;border-radius:14px;text-align:left;font-size:16px;display:flex;gap:10px;align-items:center;min-height:52px}
 .choice .idx{width:28px;height:28px;border-radius:8px;background:#0b1220;border:1px solid #1f2937;display:grid;place-items:center;font-weight:700}
 .choice.correct{outline:2px solid var(--ok);background:#0b1b12}
 .choice.wrong{outline:2px solid var(--ng);background:#1a0f12}
 .choice:disabled{opacity:.7}
 .explain{font-size:12px;color:var(--muted)}
 
-.controls{display:flex;gap:10px;flex-wrap:wrap}
-button{appearance:none;border:none;background:var(--accent);color:#041221;padding:12px 14px;border-radius:12px;font-weight:700}
-button.sec{background:var(--btn);color:var(--ink);border:1px solid #1f2937}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+button{appearance:none;border:none;background:var(--accent);color:#041221;padding:10px 12px;border-radius:12px;font-weight:700}
+button.sec{display:none}
 button.warn{background:#1f2937;color:#fca5a5;border:1px solid #7f1d1d}
 
 .hidden{display:none !important}
@@ -50,12 +50,18 @@ button.warn{background:#1f2937;color:#fca5a5;border:1px solid #7f1d1d}
 
 .tag{font-size:11px;color:#a3e635;background:#1a2b0f;border:1px solid #2c4a17;padding:2px 8px;border-radius:999px}
 
+/* 正誤オーバーレイ */
+#overlay{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.35);z-index:50}
+#overlay.show{display:grid}
+#overlayMark{font-size:18vh;font-weight:900;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))}
+#overlayHint{position:absolute;bottom:16px;font-size:12px;color:#cbd5e1}
+
   </style>
 </head>
 <body>
 <div id="wrap">
   <header>
-    <h1>地図記号5択ドリル <span class="sub">— SVG画像読み込み対応</span></h1>
+    <h1>地図記号5択ドリル <span class="sub">— 文字版・タップで次へ</span></h1>
   </header>
   <main>
     <div class="board">
@@ -97,86 +103,68 @@ button.warn{background:#1f2937;color:#fca5a5;border:1px solid #7f1d1d}
     </div>
   </section>
 
-  <section class="card" id="aboutCard">
+  <section class="card" id="aboutCard" style="max-height:20vh;overflow:auto">
     <details>
-      <summary>使い方・SVGの置き方</summary>
+      <summary>使い方（タップで次へ・1画面最適化）</summary>
       <ul>
-        <li>この版は <b>symbols/</b> フォルダの <b>SVG</b> を読み込みます。ファイル名は <code>data</code> に指定した相対パスです。</li>
-        <li>SVGが見つからない／読み込み失敗時は <b>fallbackChar</b>（例：〒, 卍 など）で表示します。</li>
-        <li>GitHub Pages で公開する場合、この <code>index.html</code> と <code>symbols/</code> を同じ階層に配置してください。</li>
+        <li>回答後は <b>画面どこでもタップ</b>で次の問題に進みます（Nextボタン不要）。</li>
+        <li>正誤は中央に <b>大きな ◯ / × オーバーレイ</b>で表示します。</li>
+        <li>スマホで1画面に収まるよう高さを自動調整します。</li>
       </ul>
-      <p style="margin:8px 0 0">必要ファイル名（例）
-      <code>symbols/post.svg, temple.svg, shrine.svg, school.svg, hospital.svg, parking.svg, factory.svg, cityhall.svg, police.svg, station.svg, mountain.svg, orchard.svg, tea.svg, paddy.svg, field.svg, lighthouse.svg</code></p>
     </details>
   </section>
 </div>
 
   </main>
   <footer>
-    <span class="sub">© 2025 Map Drill — SVG対応／単一HTML。</span>
+    <span class="sub">© 2025 Map Drill — 文字版・単一HTML</span>
   </footer>
-</div><script>
-// ===================== データセット（SVG読み込み版） =====================
-// kind: 'img' は SVG画像を <img> で読み込み（相対パス）。失敗時は fallbackChar を表示。
+</div><!-- 正誤オーバーレイ --><div id="overlay"><div id="overlayMark">◯</div><div id="overlayHint">タップで次へ</div></div><script>
+// ========== データ（文字版） ==========
 const SYMBOLS = [
-  {id:'post',       name:'郵便局',         kind:'img', data:'symbols/post.svg',       fallbackChar:'〒'},
-  {id:'temple',     name:'寺院',           kind:'img', data:'symbols/temple.svg',     fallbackChar:'卍', note:'地図記号の寺院（卍）'},
-  {id:'shrine',     name:'神社',           kind:'img', data:'symbols/shrine.svg',     fallbackChar:'⛩'},
-  {id:'school',     name:'学校',           kind:'img', data:'symbols/school.svg',     fallbackChar:'文'},
-  {id:'hospital',   name:'病院',           kind:'img', data:'symbols/hospital.svg',   fallbackChar:'H'},
-  {id:'parking',    name:'駐車場',         kind:'img', data:'symbols/parking.svg',    fallbackChar:'P'},
-  {id:'factory',    name:'工場',           kind:'img', data:'symbols/factory.svg',    fallbackChar:'工'},
-  {id:'cityhall',   name:'市役所',         kind:'img', data:'symbols/cityhall.svg',   fallbackChar:'市'},
-  {id:'police',     name:'交番・警察署',   kind:'img', data:'symbols/police.svg',     fallbackChar:'交'},
-  {id:'station',    name:'駅',             kind:'img', data:'symbols/station.svg',    fallbackChar:'駅'},
-  {id:'mountain',   name:'山頂',           kind:'img', data:'symbols/mountain.svg',   fallbackChar:'△'},
-  {id:'orchard',    name:'果樹園',         kind:'img', data:'symbols/orchard.svg',    fallbackChar:'果'},
-  {id:'tea',        name:'茶畑',           kind:'img', data:'symbols/tea.svg',        fallbackChar:'茶'},
-  {id:'paddy',      name:'水田',           kind:'img', data:'symbols/paddy.svg',      fallbackChar:'田'},
-  {id:'field',      name:'畑',             kind:'img', data:'symbols/field.svg',      fallbackChar:'畑'},
-  {id:'lighthouse', name:'灯台',           kind:'img', data:'symbols/lighthouse.svg', fallbackChar:'灯'},
+  {id:'post',     name:'郵便局',         kind:'char', data:'〒'},
+  {id:'temple',   name:'寺院',           kind:'char', data:'卍'},
+  {id:'shrine',   name:'神社',           kind:'char', data:'⛩'},
+  {id:'school',   name:'学校',           kind:'char', data:'文'},
+  {id:'hospital', name:'病院',           kind:'char', data:'H'},
+  {id:'parking',  name:'駐車場',         kind:'char', data:'P'},
+  {id:'factory',  name:'工場',           kind:'char', data:'工'},
+  {id:'cityhall', name:'市役所',         kind:'char', data:'市'},
+  {id:'police',   name:'交番・警察署',   kind:'char', data:'交'},
+  {id:'station',  name:'駅',             kind:'char', data:'駅'},
+  {id:'mountain', name:'山頂',           kind:'char', data:'△'},
+  {id:'orchard',  name:'果樹園',         kind:'char', data:'果'},
+  {id:'tea',      name:'茶畑',           kind:'char', data:'茶'},
+  {id:'paddy',    name:'水田',           kind:'char', data:'田'},
+  {id:'field',    name:'畑',             kind:'char', data:'畑'},
+  {id:'lighthouse', name:'灯台',         kind:'char', data:'灯'},
 ];
 const ALL_NAMES = SYMBOLS.map(s=>s.name);
 
-// ===================== ユーティリティ =====================
+// ========== ユーティリティ ==========
 const $ = s => document.querySelector(s);
 const shuffle = arr => arr.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
 const pad2 = n => String(n).padStart(2,'0');
 const fmtTime = ms => { const t=Math.round(ms/1000); const m=Math.floor(t/60), s=t%60; return `${pad2(m)}:${pad2(s)}`; };
 
-// 画像プリロード（任意）
-function preloadImages(urls){
-  urls.forEach(u=>{ const img = new Image(); img.src = u; });
-}
-
-// ===================== 状態管理 =====================
+// ========== 状態 ==========
 let queue = [];
 let wrongSet = new Set();
-let current = null;
-let idx = 0;
-let stage = 'first';
-let startAt = 0;
-let totalAttempts = 0;
-let totalCorrect = 0;
+let current = null; let idx = 0; let stage = 'first';
+let startAt = 0; let totalAttempts = 0; let totalCorrect = 0;
 const perItemAttempts = {};
-
-const LS_KEY = 'mapdrill_rank_v1_svg';
+const LS_KEY = 'mapdrill_rank_v1_char_tap';
+let awaitingTap = false;
 
 function resetAll(){
   queue = shuffle([...SYMBOLS]);
-  wrongSet.clear();
-  current = null;
-  idx = 0;
-  stage = 'first';
-  startAt = performance.now();
-  totalAttempts = 0;
-  totalCorrect = 0;
+  wrongSet.clear(); current = null; idx = 0; stage='first';
+  startAt = performance.now(); totalAttempts = 0; totalCorrect = 0;
   SYMBOLS.forEach(s=>perItemAttempts[s.id] = {tries:0, correctOnce:false});
   $('#finishCard').classList.add('hidden');
   $('#quizCard').classList.remove('hidden');
   $('#hint').classList.add('hidden');
   $('#feedback').textContent = '';
-  $('#nextBtn').classList.add('hidden');
   renderStats();
   nextQuestion();
 }
@@ -192,28 +180,8 @@ function renderStats(){
 }
 
 function renderSymbol(sym){
-  const box = $('#qSymbol');
-  box.innerHTML = '';
-  if(sym.kind==='img'){
-    const img = new Image();
-    img.className = 'imgSym';
-    img.alt = sym.name;
-    img.src = sym.data;
-    img.onerror = ()=>{
-      // 読み込み失敗 → フォールバック描画
-      box.innerHTML = '';
-      const d = document.createElement('div');
-      d.className = 'glyph';
-      d.textContent = sym.fallbackChar || '？';
-      box.appendChild(d);
-    };
-    box.appendChild(img);
-  } else {
-    const d = document.createElement('div');
-    d.className = 'glyph';
-    d.textContent = sym.data;
-    box.appendChild(d);
-  }
+  const box = $('#qSymbol'); box.innerHTML = '';
+  const d = document.createElement('div'); d.className='glyph'; d.textContent = sym.data; box.appendChild(d);
 }
 
 function pickChoices(answerName){
@@ -226,115 +194,92 @@ function nextQuestion(){
   if(idx >= queue.length){
     if(stage==='first' && wrongSet.size>0){
       queue = shuffle([...SYMBOLS.filter(s=>wrongSet.has(s.id))]);
-      wrongSet.clear();
-      stage = 'review';
-      idx = 0;
-      $('#hint').classList.remove('hidden');
-    }else{
-      finish();
-      return;
-    }
+      wrongSet.clear(); stage='review'; idx=0; $('#hint').classList.remove('hidden');
+    }else{ finish(); return; }
   }
   current = queue[idx];
-  renderSymbol(current);
-  $('#qCounter').textContent = `問題 ${idx+1} / ${queue.length}`;
+  renderSymbol(current); $('#qCounter').textContent = `問題 ${idx+1} / ${queue.length}`;
   $('#feedback').textContent = '';
 
   const opts = pickChoices(current.name);
-  const choiceWrap = $('#choices');
-  choiceWrap.innerHTML = '';
-
+  const wrap = $('#choices'); wrap.innerHTML = '';
   opts.forEach((name,i)=>{
     const btn = document.createElement('button');
     btn.className = 'choice';
     btn.innerHTML = `<span class="idx">${i+1}</span> <span>${name}</span>`;
     btn.addEventListener('click',()=>onAnswer(btn, name));
-    choiceWrap.appendChild(btn);
+    wrap.appendChild(btn);
   });
-
-  $('#nextBtn').classList.add('hidden');
+  awaitingTap = false; $('#overlay').classList.remove('show');
   renderStats();
 }
 
 function onAnswer(btn, chosenName){
-  if(!current) return;
-  totalAttempts++;
-  perItemAttempts[current.id].tries++;
-
-  const all = Array.from(document.querySelectorAll('.choice'));
-  all.forEach(b=>b.disabled=true);
-
+  if(!current) return; if(awaitingTap) return;
+  totalAttempts++; perItemAttempts[current.id].tries++;
+  const all = Array.from(document.querySelectorAll('.choice')); all.forEach(b=>b.disabled=true);
   const correct = (chosenName === current.name);
   const feedback = $('#feedback');
 
   if(correct){
     btn.classList.add('correct');
-    feedback.innerHTML = `✅ 正解：<b>${current.name}</b>${current.note? `　<span class=\"explain\">${current.note}</span>`:''}`;
-    if(!perItemAttempts[current.id].correctOnce){
-      perItemAttempts[current.id].correctOnce = true;
-      totalCorrect++;
-    }
-    navigator.vibrate?.(20);
+    feedback.innerHTML = `✅ 正解：<b>${current.name}</b>`;
+    if(!perItemAttempts[current.id].correctOnce){ perItemAttempts[current.id].correctOnce = true; totalCorrect++; }
+    showOverlay(true); navigator.vibrate?.(20);
   }else{
     btn.classList.add('wrong');
     const hit = Array.from(document.querySelectorAll('.choice')).find(b=>b.textContent.includes(current.name));
     if(hit) hit.classList.add('correct');
     feedback.textContent = `❌ 不正解：正しくは「${current.name}」`;
-    wrongSet.add(current.id);
-    navigator.vibrate?.([10,40,20]);
+    wrongSet.add(current.id); showOverlay(false); navigator.vibrate?.([10,40,20]);
   }
-
-  $('#nextBtn').classList.remove('hidden');
   renderStats();
 }
+
+function showOverlay(isOK){
+  const ov = $('#overlay'); const mark = $('#overlayMark');
+  mark.textContent = isOK ? '◯' : '×'; mark.style.color = isOK ? '#22c55e' : '#ef4444';
+  ov.classList.add('show'); awaitingTap = true;
+}
+function handleTap(){
+  if(!awaitingTap) return;
+  awaitingTap = false; $('#overlay').classList.remove('show'); idx++; nextQuestion();
+}
+window.addEventListener('pointerdown', handleTap);
 
 function finish(){
   const elapsed = performance.now()-startAt;
   $('#finalAcc').textContent = `${Math.round((totalCorrect/totalAttempts)*100)}%`;
   $('#finalTime').textContent = fmtTime(elapsed);
-  renderRanking();
-  $('#quizCard').classList.add('hidden');
-  $('#finishCard').classList.remove('hidden');
+  renderRanking(); $('#quizCard').classList.add('hidden'); $('#finishCard').classList.remove('hidden');
 }
 
 function renderRanking(){
-  const tbody = $('#rankTable tbody');
-  tbody.innerHTML = '';
-  const list = loadRank();
-  list.forEach((r,i)=>{
+  const tbody = $('#rankTable tbody'); tbody.innerHTML = '';
+  const list = loadRank(); list.forEach((r,i)=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${i+1}</td><td>${r.name||'-'}</td><td>${Math.round(r.acc*100)}%</td><td>${fmtTime(r.ms)}</td><td>${new Date(r.at).toLocaleDateString()}</td>`;
     tbody.appendChild(tr);
   });
 }
-
 function loadRank(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch{return []} }
 function saveRank(list){ localStorage.setItem(LS_KEY, JSON.stringify(list)); }
-
 function pushScore(){
   const name = $('#playerName').value.trim();
-  const ms = performance.now()-startAt;
-  const acc = totalAttempts? (totalCorrect/totalAttempts) : 0;
+  const ms = performance.now()-startAt; const acc = totalAttempts? (totalCorrect/totalAttempts) : 0;
   const entry = {name, ms, acc, at: Date.now()};
-  const list = loadRank();
-  list.push(entry);
-  list.sort((a,b)=> (b.acc-a.acc) || (a.ms-b.ms));
-  saveRank(list.slice(0,50));
-  renderRanking();
+  const list = loadRank(); list.push(entry); list.sort((a,b)=> (b.acc-a.acc)||(a.ms-b.ms));
+  saveRank(list.slice(0,50)); renderRanking();
 }
 
-// ===================== イベント =====================
-$('#nextBtn').addEventListener('click', ()=>{ idx++; nextQuestion(); });
+// ========== イベント ==========
 $('#restartBtn').addEventListener('click', ()=>{ if(confirm('最初からやり直しますか？')) resetAll(); });
 $('#againBtn').addEventListener('click', resetAll);
 $('#saveScoreBtn').addEventListener('click', pushScore);
 $('#clearRankBtn').addEventListener('click', ()=>{ if(confirm('ランキングを消去しますか？')){ localStorage.removeItem(LS_KEY); renderRanking(); }});
-
-// タイマー表示（1秒毎）
 setInterval(()=>{ if($('#quizCard')&&!$('#quizCard').classList.contains('hidden')) renderStats(); }, 1000);
 
-// 起動：SVGプリロード → リセット
-preloadImages(SYMBOLS.filter(s=>s.kind==='img').map(s=>s.data));
+// 起動
 resetAll();
 </script></body>
 </html>
