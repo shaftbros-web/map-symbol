@@ -1,0 +1,349 @@
+<!DOCTYPE html><html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>地図記号5択ドリル</title>
+  <meta name="description" content="中学生向け：地図記号を5択で覚えるスマホ用WEBアプリ。GitHub Pagesで公開しやすい単一HTML。" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <style>
+    :root{
+      --bg:#0b0f14; --panel:#0f1520; --ink:#e6edf3; --muted:#9aa4b2; --accent:#60a5fa; --ok:#22c55e; --ng:#ef4444;
+      --btn:#1f2937; --btn2:#111827; --card:#0f172a; --shadow:0 10px 30px rgba(0,0,0,.25);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;}
+    #wrap{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto;}
+    header,footer{background:var(--panel);padding:10px env(safe-area-inset-right,12px) 10px env(safe-area-inset-left,12px);border-bottom:1px solid #1f2937}
+    footer{border-top:1px solid #1f2937;border-bottom:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    header h1{margin:0;font-size:18px;letter-spacing:.02em}
+    header .sub{font-size:12px;color:var(--muted)}main{overflow:auto;padding:14px;}
+.board{max-width:680px;margin:0 auto;display:grid;gap:14px}
+
+.card{background:var(--card);border:1px solid #1f2937;border-radius:16px;box-shadow:var(--shadow);padding:14px}
+.flex{display:flex;gap:12px;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--btn2);padding:10px;border-radius:12px;text-align:center;border:1px solid #1f2937}
+.stat .v{font-size:18px;font-weight:700}
+.stat .k{font-size:11px;color:var(--muted)}
+
+.q-symbol{display:grid;place-items:center;height:220px;border-radius:16px;background:linear-gradient(180deg,#0d1625,#0b1220);border:1px solid #1e293b}
+.glyph{font-size:110px;line-height:1}
+.imgSym{width:160px;height:160px;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.3))}
+.q-meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;margin-top:6px}
+
+.choices{display:grid;gap:10px}
+@media(min-width:520px){.choices{grid-template-columns:repeat(2,1fr)}}
+.choice{
+  border:1px solid #1f2937;background:var(--btn);color:var(--ink);padding:14px;border-radius:14px;text-align:left;font-size:16px;
+  display:flex;gap:10px;align-items:center;position:relative;min-height:54px
+}
+.choice .idx{width:28px;height:28px;border-radius:8px;background:#0b1220;border:1px solid #1f2937;display:grid;place-items:center;font-weight:700}
+.choice.correct{outline:2px solid var(--ok);background:#0b1b12}
+.choice.wrong{outline:2px solid var(--ng);background:#1a0f12}
+.choice:disabled{opacity:.7}
+.explain{font-size:12px;color:var(--muted)}
+
+.controls{display:flex;gap:10px;flex-wrap:wrap}
+button{appearance:none;border:none;background:var(--accent);color:#041221;padding:12px 14px;border-radius:12px;font-weight:700}
+button.sec{background:var(--btn);color:var(--ink);border:1px solid #1f2937}
+button.warn{background:#1f2937;color:#fca5a5;border:1px solid #7f1d1d}
+
+.hidden{display:none !important}
+.rank{width:100%;border-collapse:collapse;font-size:14px}
+.rank th,.rank td{border-bottom:1px solid #1f2937;padding:8px}
+.rank th{color:var(--muted);font-weight:600;text-align:left}
+
+.tag{font-size:11px;color:#a3e635;background:#1a2b0f;border:1px solid #2c4a17;padding:2px 8px;border-radius:999px}
+
+  </style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>地図記号5択ドリル <span class="sub">— 中学生向け・スマホ最適化</span></h1>
+  </header>
+  <main>
+    <div class="board">
+      <section class="card" id="statsCard">
+        <div class="stats">
+          <div class="stat"><div class="v" id="statProgress">0/0</div><div class="k">進行状況</div></div>
+          <div class="stat"><div class="v" id="statAcc">0%</div><div class="k">正解率（総合）</div></div>
+          <div class="stat"><div class="v" id="statTime">00:00</div><div class="k">経過時間</div></div>
+          <div class="stat"><div class="v" id="statStage">初回</div><div class="k">ステージ</div></div>
+        </div>
+      </section><section class="card" id="quizCard">
+    <div class="q-symbol" id="qSymbol"></div>
+    <div class="q-meta"><div id="qCounter">—</div><div id="hint" class="tag hidden">不正解の復習モード</div></div>
+    <div class="choices" id="choices"></div>
+    <div id="feedback" class="explain"></div>
+    <div class="controls">
+      <button id="nextBtn" class="sec hidden">つぎへ ▶</button>
+      <button id="restartBtn" class="warn">最初から</button>
+    </div>
+  </section>
+
+  <section class="card hidden" id="finishCard">
+    <h2 style="margin-top:0">🎉 全問正解！クリア！</h2>
+    <p>総合正解率 <b id="finalAcc">—</b> ／ クリア時間 <b id="finalTime">—</b></p>
+    <div class="flex">
+      <label for="playerName">名前（ランキング用・任意）</label>
+      <input id="playerName" placeholder="例：TS" style="flex:1;padding:10px;border-radius:10px;border:1px solid #1f2937;background:#0b1220;color:var(--ink)"/>
+      <button id="saveScoreBtn">保存</button>
+    </div>
+    <div style="height:8px"></div>
+    <h3 style="margin:6px 0 0">🏆 ローカルランキング</h3>
+    <table class="rank" id="rankTable">
+      <thead><tr><th>#</th><th>名前</th><th>正解率</th><th>時間</th><th>日付</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="controls" style="margin-top:6px">
+      <button id="againBtn">もう一度</button>
+      <button id="clearRankBtn" class="warn">ランキングを消去</button>
+    </div>
+  </section>
+
+  <section class="card" id="aboutCard">
+    <details>
+      <summary>使い方・カスタマイズ</summary>
+      <ul>
+        <li>5択×1問ずつランダム表示。全問終了後、不正解だけをランダム再出題し、全て正解になるまで続きます。</li>
+        <li>終了時に <b>正解率・時間</b> を表示し、端末ローカルに <b>ランキング</b> を保存します（サーバ不要）。</li>
+        <li>記号は <code>SYMBOLS</code> 配列で管理。<code>kind</code> が <code>char</code> なら文字や絵文字、<code>img</code> なら <code>data</code> に画像パス（PNG/SVG）を指定できます。</li>
+        <li>GitHub Pages で公開する場合、この <code>index.html</code> をリポジトリに置き、Settings → Pages → Deploy from a branch → <b>main / root</b> を選択。</li>
+      </ul>
+    </details>
+  </section>
+</div>
+
+  </main>
+  <footer>
+    <span class="sub">© 2025 Map Drill — 単一HTML/JS。データ差し替え自由。</span>
+  </footer>
+</div><script>
+// ===================== データセット（必要に応じて差し替え） =====================
+// kind: 'char' は文字・絵文字・簡易記号、'img' は画像（相対パス or data URI）
+const SYMBOLS = [
+  {id:'post',     name:'郵便局',         kind:'char', data:'〒'},
+  {id:'temple',   name:'寺院',           kind:'char', data:'卍', note:'※地図では寺院を示す記号（卍）'},
+  {id:'shrine',   name:'神社',           kind:'char', data:'⛩'},
+  {id:'school',   name:'学校',           kind:'char', data:'文'},
+  {id:'hospital', name:'病院',           kind:'char', data:'H'},
+  {id:'parking',  name:'駐車場',         kind:'char', data:'P'},
+  {id:'factory',  name:'工場',           kind:'char', data:'工'},
+  {id:'cityhall', name:'市役所',         kind:'char', data:'市'},
+  {id:'police',   name:'交番・警察署',   kind:'char', data:'交'},
+  {id:'station',  name:'駅',             kind:'char', data:'駅'},
+  {id:'mountain', name:'山頂',           kind:'char', data:'△'},
+  {id:'orchard',  name:'果樹園',         kind:'char', data:'果'},
+  {id:'tea',      name:'茶畑',           kind:'char', data:'茶'},
+  {id:'paddy',    name:'水田',           kind:'char', data:'田'},
+  {id:'field',    name:'畑',             kind:'char', data:'畑'},
+  {id:'lighthouse', name:'灯台',         kind:'char', data:'灯'},
+];
+
+// 5択用に誤答候補を生成するとき、同じカテゴリ名が混在しないように名前で判定
+const ALL_NAMES = SYMBOLS.map(s=>s.name);
+
+// ===================== ユーティリティ =====================
+const $ = s => document.querySelector(s);
+const shuffle = arr => arr.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+const pad2 = n => String(n).padStart(2,'0');
+const fmtTime = ms => { const t=Math.round(ms/1000); const m=Math.floor(t/60), s=t%60; return `${pad2(m)}:${pad2(s)}`; };
+
+// ===================== 状態管理 =====================
+let queue = [];            // 出題キュー（初回 → 復習モード）
+let wrongSet = new Set();  // 不正解のID集合
+let current = null;        // 現在の問題（オブジェクト）
+let idx = 0;               // 現在のインデックス（0-based）
+let stage = 'first';       // 'first' | 'review'
+let startAt = 0;           // 開始時刻
+let totalAttempts = 0;     // 総回答数
+let totalCorrect = 0;      // 総正解数
+const perItemAttempts = {}; // id -> {tries, correctOnce}
+
+// ランキング（ローカル）
+const LS_KEY = 'mapdrill_rank_v1';
+
+function resetAll(){
+  queue = shuffle([...SYMBOLS]);
+  wrongSet.clear();
+  current = null;
+  idx = 0;
+  stage = 'first';
+  startAt = performance.now();
+  totalAttempts = 0;
+  totalCorrect = 0;
+  SYMBOLS.forEach(s=>perItemAttempts[s.id] = {tries:0, correctOnce:false});
+  $('#finishCard').classList.add('hidden');
+  $('#quizCard').classList.remove('hidden');
+  $('#hint').classList.add('hidden');
+  $('#feedback').textContent = '';
+  $('#nextBtn').classList.add('hidden');
+  renderStats();
+  nextQuestion();
+}
+
+function renderStats(){
+  $('#statProgress').textContent = `${idx}/${SYMBOLS.length}`;
+  const acc = totalAttempts? Math.round((totalCorrect/totalAttempts)*100) : 0;
+  $('#statAcc').textContent = `${acc}%`;
+  const elapsed = performance.now()-startAt;
+  $('#statTime').textContent = fmtTime(elapsed);
+  $('#statStage').textContent = (stage==='first'? '初回':'復習');
+  if(stage==='review') $('#hint').classList.remove('hidden');
+}
+
+function renderSymbol(sym){
+  const box = $('#qSymbol');
+  box.innerHTML = '';
+  if(sym.kind==='char'){
+    const d = document.createElement('div');
+    d.className = 'glyph';
+    d.textContent = sym.data;
+    box.appendChild(d);
+  }else if(sym.kind==='img'){
+    const img = document.createElement('img');
+    img.className = 'imgSym';
+    img.src = sym.data; // 例: 'symbols/post.png'
+    img.alt = sym.name;
+    box.appendChild(img);
+  }
+}
+
+function pickChoices(answerName){
+  const pool = ALL_NAMES.filter(n=>n!==answerName);
+  const picks = shuffle(pool).slice(0,4);
+  const list = shuffle([answerName, ...picks]);
+  return list;
+}
+
+function nextQuestion(){
+  // クリア判定
+  if(idx >= queue.length){
+    if(stage==='first' && wrongSet.size>0){
+      // 復習モードに突入
+      queue = shuffle([...SYMBOLS.filter(s=>wrongSet.has(s.id))]);
+      wrongSet.clear();
+      stage = 'review';
+      idx = 0;
+      $('#hint').classList.remove('hidden');
+    }else{
+      // 完了
+      finish();
+      return;
+    }
+  }
+
+  current = queue[idx];
+  renderSymbol(current);
+  $('#qCounter').textContent = `問題 ${idx+1} / ${queue.length}`;
+  $('#feedback').textContent = '';
+
+  const opts = pickChoices(current.name);
+  const choiceWrap = $('#choices');
+  choiceWrap.innerHTML = '';
+
+  opts.forEach((name,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.innerHTML = `<span class="idx">${i+1}</span> <span>${name}</span>`;
+    btn.addEventListener('click',()=>onAnswer(btn, name));
+    choiceWrap.appendChild(btn);
+  });
+
+  $('#nextBtn').classList.add('hidden');
+  renderStats();
+}
+
+function onAnswer(btn, chosenName){
+  if(!current) return;
+  totalAttempts++;
+  perItemAttempts[current.id].tries++;
+
+  const all = Array.from(document.querySelectorAll('.choice'));
+  all.forEach(b=>b.disabled=true);
+
+  const correct = (chosenName === current.name);
+  const feedback = $('#feedback');
+
+  if(correct){
+    btn.classList.add('correct');
+    feedback.innerHTML = `✅ 正解：<b>${current.name}</b>${current.note? `　<span class="explain">${current.note}</span>`:''}`;
+    if(!perItemAttempts[current.id].correctOnce){
+      perItemAttempts[current.id].correctOnce = true;
+      totalCorrect++;
+    }
+    navigator.vibrate?.(20);
+  }else{
+    btn.classList.add('wrong');
+    // 正解ボタンをハイライト
+    const hit = Array.from(document.querySelectorAll('.choice')).find(b=>b.textContent.includes(current.name));
+    if(hit) hit.classList.add('correct');
+    feedback.textContent = `❌ 不正解：正しくは「${current.name}」`;
+    wrongSet.add(current.id);
+    navigator.vibrate?.([10,40,20]);
+  }
+
+  $('#nextBtn').classList.remove('hidden');
+  renderStats();
+}
+
+function finish(){
+  const elapsed = performance.now()-startAt;
+  $('#finalAcc').textContent = `${Math.round((totalCorrect/totalAttempts)*100)}%`;
+  $('#finalTime').textContent = fmtTime(elapsed);
+
+  // ランキング表示
+  renderRanking();
+
+  $('#quizCard').classList.add('hidden');
+  $('#finishCard').classList.remove('hidden');
+}
+
+function renderRanking(){
+  const tbody = $('#rankTable tbody');
+  tbody.innerHTML = '';
+  const list = loadRank();
+  list.forEach((r,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td>${r.name||'-'}</td><td>${Math.round(r.acc*100)}%</td><td>${fmtTime(r.ms)}</td><td>${new Date(r.at).toLocaleDateString()}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function loadRank(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch{return []}
+}
+function saveRank(list){
+  localStorage.setItem(LS_KEY, JSON.stringify(list));
+}
+
+function pushScore(){
+  const name = $('#playerName').value.trim();
+  const ms = performance.now()-startAt;
+  const acc = totalAttempts? (totalCorrect/totalAttempts) : 0;
+  const entry = {name, ms, acc, at: Date.now()};
+  const list = loadRank();
+  list.push(entry);
+  // ソート：正解率↓ → 時間↑
+  list.sort((a,b)=> (b.acc-a.acc) || (a.ms-b.ms));
+  // 上位50件まで
+  saveRank(list.slice(0,50));
+  renderRanking();
+}
+
+// ===================== イベント =====================
+$('#nextBtn').addEventListener('click', ()=>{ idx++; nextQuestion(); });
+$('#restartBtn').addEventListener('click', ()=>{ if(confirm('最初からやり直しますか？')) resetAll(); });
+$('#againBtn').addEventListener('click', resetAll);
+$('#saveScoreBtn').addEventListener('click', pushScore);
+$('#clearRankBtn').addEventListener('click', ()=>{ if(confirm('ランキングを消去しますか？')){ saveRank([]); renderRanking(); }});
+
+// タイマー表示の更新（1秒毎）
+setInterval(()=>{ if($('#quizCard')&&!$('#quizCard').classList.contains('hidden')) renderStats(); }, 1000);
+
+// 起動
+resetAll();
+</script></body>
+</html>
