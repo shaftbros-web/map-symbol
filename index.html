@@ -1,40 +1,53 @@
-<!DOCTYPE html><html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>地図記号5択ドリル — SVG版</title>
-  <meta name="description" content="中学生向け：地図記号を5択で覚えるスマホ用WEBアプリ（SVG画像読み込み対応版）。GitHub Pagesで公開しやすい単一HTML。" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <style>
-    :root{ --bg:#0b0f14; --panel:#0f1520; --ink:#e6edf3; --muted:#9aa4b2; --accent:#60a5fa; --ok:#22c55e; --ng:#ef4444; --btn:#1f2937; --btn2:#111827; --card:#0f172a; --shadow:0 10px 30px rgba(0,0,0,.25); }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;}
-    #wrap{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto}
-    header,footer{background:var(--panel);padding:10px env(safe-area-inset-right,12px) 10px env(safe-area-inset-left,12px);border-bottom:1px solid #1f2937}
-    footer{border-top:1px solid #1f2937;border-bottom:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    header h1{margin:0;font-size:18px;letter-spacing:.02em}
-    header .sub{font-size:12px;color:var(--muted)}main{overflow:auto;padding:14px}
-.board{max-width:680px;margin:0 auto;display:grid;gap:14px}
-
-.card{background:var(--card);border:1px solid #1f2937;border-radius:16px;box-shadow:var(--shadow);padding:14px}
-.flex{display:flex;gap:12px;align-items:center}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.stat{background:var(--btn2);padding:10px;border-radius:12px;text-align:center;border:1px solid #1f2937}
-.stat .v{font-size:18px;font-weight:700}
-.stat .k{font-size:11px;color:var(--muted)}
-
-.q-symbol{display:grid;place-items:center;height:240px;border-radius:16px;background:linear-gradient(180deg,#0d1625,#0b1220);border:1px solid #1e293b}
-.glyph{font-size:110px;line-height:1}
-.imgSym{width:170px;height:170px;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.35))}
-.q-meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;margin-top:6px}
-
-.choices{display:grid;gap:10px}
-@media(min-width:520px){.choices{grid-template-columns:repeat(2,1fr)}}
-.choice{border:1px solid #1f2937;background:var(--btn);color:var(--ink);padding:14px;border-radius:14px;text-align:left;font-size:16px;display:flex;gap:10px;align-items:center;position:relative;min-height:54px}
-.choice .idx{width:28px;height:28px;border-radius:8px;background:#0b1220;border:1px solid #1f2937;display:grid;place-items:center;font-weight:700}
-.choice.correct{outline:2px solid var(--ok);background:#0b1b12}
-.choice.wrong{outline:2px solid var(--ng);background:#1a0f12}
+<!DOCTYPE html><html lang="ja"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>テスト版：地図記号</title>
+<style>
+  body{margin:0;background:#0b0f14;color:#e6edf3;font-family:system-ui}
+  .wrap{min-height:100dvh;display:grid;place-items:center;padding:24px}
+  .card{background:#0f172a;border:1px solid #1f2937;border-radius:16px;padding:16px;max-width:560px;width:100%}
+  .sym{display:grid;place-items:center;height:220px;background:linear-gradient(180deg,#0d1625,#0b1220);border:1px solid #1e293b;border-radius:12px}
+  .glyph{font-size:110px}
+  .choices{display:grid;gap:10px;margin-top:12px}
+  .choices button{background:#1f2937;color:#e6edf3;border:1px solid #334155;border-radius:12px;padding:14px;font-size:16px;text-align:left}
+  .ok{outline:2px solid #22c55e;background:#0b1b12}
+  .ng{outline:2px solid #ef4444;background:#1a0f12}
+</style></head><body>
+<div class="wrap"><div class="card">
+  <div id="sym" class="sym"><div class="glyph" id="glyph">〒</div></div>
+  <div class="choices" id="choices"></div>
+  <div id="fb" style="margin-top:8px;color:#9aa4b2"></div>
+</div></div>
+<script>
+const SYMBOLS=[
+  {id:'post',name:'郵便局',kind:'img',data:'symbols/post.svg',fallbackChar:'〒'},
+  {id:'temple',name:'寺院',kind:'img',data:'symbols/temple.svg',fallbackChar:'卍'},
+  {id:'parking',name:'駐車場',kind:'img',data:'symbols/parking.svg',fallbackChar:'P'}
+];
+const $=s=>document.querySelector(s);
+function render(sym){
+  const box=$("#sym"); box.innerHTML="";
+  const img=new Image(); img.alt=sym.name; img.style.width="170px"; img.style.height="170px";
+  img.onerror=()=>{ const d=document.createElement("div"); d.className="glyph"; d.textContent=sym.fallbackChar||"？"; box.appendChild(d); };
+  img.onload=()=>box.appendChild(img);
+  img.src=sym.data; // SVGが無ければ onerror → フォールバック文字
+}
+function ask(){
+  const s=SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)];
+  render(s);
+  const names=SYMBOLS.map(x=>x.name); names.sort(()=>Math.random()-0.5);
+  const opts=[s.name,...names.filter(n=>n!==s.name).slice(0,4)].sort(()=>Math.random()-0.5);
+  const wrap=$("#choices"); wrap.innerHTML="";
+  opts.forEach(n=>{
+    const b=document.createElement("button"); b.textContent=n;
+    b.onclick=()=>{ [...wrap.children].forEach(x=>x.disabled=true);
+      if(n===s.name){ b.classList.add("ok"); $("#fb").textContent="正解"; }
+      else{ b.classList.add("ng"); $("#fb").textContent=`不正解：正しくは ${s.name}`; }
+    };
+    wrap.appendChild(b);
+  });
+}
+ask();
+</script></body></html>.choice.wrong{outline:2px solid var(--ng);background:#1a0f12}
 .choice:disabled{opacity:.7}
 .explain{font-size:12px;color:var(--muted)}
 
