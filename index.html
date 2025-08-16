@@ -1,64 +1,153 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>地図記号4択ドリル — 文字版（タップで次へ）</title>
-<style>
-  :root{--bg:#0b0f14;--panel:#0f1520;--ink:#e6edf3;--muted:#9aa4b2;--ok:#22c55e;--ng:#ef4444}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;height:100dvh;display:flex;flex-direction:column}
-  header,footer{background:#0f1520;padding:6px 10px;font-size:14px;text-align:center}
-  main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;overflow:hidden;padding:8px}
-  .symbol{font-size:clamp(72px,14vh,120px);margin:4px}
-  .choices{display:grid;gap:8px;width:100%;max-width:360px;grid-template-columns:1fr 1fr}
-  .choices button{padding:12px;border:none;border-radius:12px;background:#1f2937;color:var(--ink);font-size:16px}
-  .choices button.correct{background:#14532d}
-  .choices button.wrong{background:#7f1d1d}
-  #judge{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18vh;font-weight:900;opacity:0;transition:opacity .2s ease;pointer-events:none}
-  #judge.show{opacity:1}
-  details#rank{max-width:560px;margin:0 auto;padding:8px}
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  th,td{border-bottom:1px solid #1f2937;padding:6px;text-align:left}
-  th{color:#9aa4b2;font-weight:600}
-</style></head>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>地図記号4択ドリル — 文字版（タップで次へ）</title>
+  <style>
+    :root{--bg:#0b0f14;--panel:#0f1520;--ink:#e6edf3;--muted:#9aa4b2;--ok:#22c55e;--ng:#ef4444}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}
+    body{min-height:100dvh;display:flex;flex-direction:column}
+    header,footer{background:var(--panel);padding:8px 10px;font-size:14px;text-align:center}
+    main{flex:1;display:grid;place-items:center;padding:10px}
+    .wrap{width:100%;max-width:560px;display:grid;gap:10px}
+    .symbolBox{display:grid;place-items:center;height:clamp(160px,36vh,320px);border:1px solid #1e293b;border-radius:16px;background:linear-gradient(180deg,#0d1625,#0b1220)}
+    .symbol{font-size:clamp(72px,14vh,120px);line-height:1}
+    .choices{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+    .choices button{padding:12px;border:none;border-radius:12px;background:#1f2937;color:var(--ink);font-size:16px}
+    .choices button.correct{background:#14532d}
+    .choices button.wrong{background:#7f1d1d}
+    #feedback{color:var(--muted);font-size:12px;min-height:16px}
+    #judge{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.35);z-index:50}
+    #judge.show{display:grid}
+    #judgeMark{font-size:18vh;font-weight:900;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))}
+    details#rank{max-width:560px;margin:0 auto;padding:8px}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{border-bottom:1px solid #1f2937;padding:6px;text-align:left}
+    th{color:var(--muted);font-weight:600}
+  </style>
+</head>
 <body>
-<header>地図記号4択ドリル — 文字版</header>
-<main>
-  <div class="symbol" id="qSymbol">?</div>
-  <div class="choices" id="choices"></div>
-  <div id="feedback" style="color:#9aa4b2;font-size:12px"></div>
-</main>
-<div id="judge"></div>
-<details id="rank">
-  <summary>🏆 ローカルランキング（自動記録：日時・正解率・時間）</summary>
-  <table>
-    <thead><tr><th>#</th><th>日時</th><th>正解率</th><th>時間</th></tr></thead>
-    <tbody id="rankBody"></tbody>
-  </table>
-</details>
-<footer><span id="progress">0/0</span> 正解率:<span id="acc">0%</span></footer>
+  <header>地図記号4択ドリル — 文字版</header>
+  <main>
+    <div class="wrap">
+      <div class="symbolBox"><div id="qSymbol" class="symbol">?</div></div>
+      <div id="choices" class="choices"></div>
+      <div id="feedback"></div>
+    </div>
+  </main>
+
+  <!-- 正誤オーバーレイ -->
+  <div id="judge">
+    <div id="judgeMark">◯</div>
+    <div style="position:absolute;bottom:16px;font-size:12px;color:#cbd5e1">自動で次の問題へ</div>
+  </div>
+
+  <details id="rank">
+    <summary>🏆 ローカルランキング（日時・正解率・時間を自動記録）</summary>
+    <table>
+      <thead><tr><th>#</th><th>日時</th><th>正解率</th><th>時間</th></tr></thead>
+      <tbody id="rankBody"></tbody>
+    </table>
+  </details>
+
+  <footer><span id="progress">0/0</span>　正解率:<span id="acc">0%</span></footer>
+
 <script>
-const SYMBOLS=[
- {id:'post',name:'郵便局',char:'〒'},
- {id:'temple',name:'寺院',char:'卍'},
- {id:'shrine',name:'神社',char:'⛩'},
- {id:'school',name:'学校',char:'文'},
- {id:'hospital',name:'病院',char:'H'},
- {id:'parking',name:'駐車場',char:'P'},
- {id:'factory',name:'工場',char:'工'},
- {id:'cityhall',name:'市役所',char:'市'},
- {id:'police',name:'交番・警察署',char:'交'},
- {id:'station',name:'駅',char:'駅'},
- {id:'mountain',name:'山頂',char:'△'},
- {id:'orchard',name:'果樹園',char:'果'},
- {id:'tea',name:'茶畑',char:'茶'},
- {id:'paddy',name:'水田',char:'田'},
- {id:'field',name:'畑',char:'畑'},
- {id:'lighthouse',name:'灯台',char:'灯'}
+"use strict";
+
+// ===== データ（文字版・四択） =====
+const SYMBOLS = [
+  {id:'post',name:'郵便局',char:'〒'},
+  {id:'temple',name:'寺院',char:'卍'},
+  {id:'shrine',name:'神社',char:'⛩'},
+  {id:'school',name:'学校',char:'文'},
+  {id:'hospital',name:'病院',char:'H'},
+  {id:'parking',name:'駐車場',char:'P'},
+  {id:'factory',name:'工場',char:'工'},
+  {id:'cityhall',name:'市役所',char:'市'},
+  {id:'police',name:'交番・警察署',char:'交'},
+  {id:'station',name:'駅',char:'駅'},
+  {id:'mountain',name:'山頂',char:'△'},
+  {id:'orchard',name:'果樹園',char:'果'},
+  {id:'tea',name:'茶畑',char:'茶'},
+  {id:'paddy',name:'水田',char:'田'},
+  {id:'field',name:'畑',char:'畑'},
+  {id:'lighthouse',name:'灯台',char:'灯'}
 ];
-const $=s=>document.querySelector(s);
-const shuffle=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);// ランキング（名前入力なし。日時・正解率・時間のみ） const LS_KEY='mapdrill_rank_char_v2'; function loadRank(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]')}catch{return []}} function saveRank(list){localStorage.setItem(LS_KEY,JSON.stringify(list))} function fmt2(n){return String(n).padStart(2,'0')} function fmtTime(ms){const t=Math.round(ms/1000);const m=Math.floor(t/60),s=t%60;return ${fmt2(m)}:${fmt2(s)}} function renderRank(){const tbody=$('#rankBody');tbody.innerHTML='';loadRank().forEach((r,i)=>{const tr=document.createElement('tr');const d=new Date(r.at);const when=${d.getFullYear()}/${fmt2(d.getMonth()+1)}/${fmt2(d.getDate())} ${fmt2(d.getHours())}:${fmt2(d.getMinutes())};tr.innerHTML=<td>${i+1}</td><td>${when}</td><td>${Math.round(r.acc*100)}%</td><td>${fmtTime(r.ms)}</td>;tbody.appendChild(tr)})} function pushRank(acc,ms){const list=loadRank();list.push({at:Date.now(),acc,ms});list.sort((a,b)=> (b.acc-a.acc)||(a.ms-b.ms));saveRank(list.slice(0,50));renderRank()}
 
-let queue=[];let idx=0;let correct=0;let attempts=0;let startAt=0; function start(){queue=shuffle([...SYMBOLS]);idx=0;correct=0;attempts=0;startAt=performance.now();next()} function next(){if(idx>=queue.length){const acc=attempts?correct/attempts:0;const ms=performance.now()-startAt;pushRank(acc,ms);alert(クリア！ 正解率:${Math.round(acc*100)}%  時間:${fmtTime(ms)});start();return;} const sym=queue[idx];$('#qSymbol').textContent=sym.char; const names=SYMBOLS.map(s=>s.name).filter(n=>n!==sym.name); // 誤答候補 const opts=shuffle([sym.name,...shuffle(names).slice(0,3)]); // ← 四択（正解1 + 誤答3） const wrap=$('#choices');wrap.innerHTML=''; opts.forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>answer(n,sym.name,b);wrap.appendChild(b)}); $('#progress').textContent=(idx+1)+"/"+queue.length;$('#acc').textContent=(attempts?Math.round(correct/attempts*100):0)+"%"; } function answer(sel,ans,btn){attempts++;if(sel===ans){correct++;btn.classList.add('correct');showJudge('◯','var(--ok)')}else{btn.classList.add('wrong');showJudge('×','var(--ng)')} setTimeout(()=>{idx++;next()},700)} function showJudge(mark,color){const j=$('#judge');j.textContent=mark;j.style.color=color;j.classList.add('show');setTimeout(()=>j.classList.remove('show'),600)}
+// ===== util =====
+const $ = s => document.querySelector(s);
+const shuffle = a => a.map(x=>[Math.random(),x]).sort((m,n)=>m[0]-n[0]).map(x=>x[1]);
+const two = n => String(n).padStart(2,"0");
+const fmtTime = ms => { const t=Math.round(ms/1000); const m=Math.floor(t/60), s=t%60; return `${two(m)}:${two(s)}`; };
 
-renderRank(); start(); </script>
+// ===== ranking (日時のみ) =====
+const LS_KEY = "mapdrill_rank_char_v2";
+const loadRank = () => { try{ return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); }catch{ return []; } };
+const saveRank = (list) => localStorage.setItem(LS_KEY, JSON.stringify(list));
+function pushRank(acc,ms){ const list = loadRank(); list.push({at:Date.now(), acc, ms}); list.sort((a,b)=>(b.acc-a.acc)||(a.ms-b.ms)); saveRank(list.slice(0,50)); renderRank(); }
+function renderRank(){ const tb=$("#rankBody"); tb.innerHTML=""; loadRank().forEach((r,i)=>{ const d=new Date(r.at); const when = `${d.getFullYear()}/${two(d.getMonth()+1)}/${two(d.getDate())} ${two(d.getHours())}:${two(d.getMinutes())}`; const tr=document.createElement("tr"); tr.innerHTML = `<td>${i+1}</td><td>${when}</td><td>${Math.round(r.acc*100)}%</td><td>${fmtTime(r.ms)}</td>`; tb.appendChild(tr); }); }
 
-</body></html>
+// ===== quiz state =====
+let queue=[], idx=0, correct=0, attempts=0, startedAt=0;
+
+function start(){
+  queue = shuffle([...SYMBOLS]);
+  idx = 0; correct = 0; attempts = 0; startedAt = performance.now();
+  next();
+}
+
+function next(){
+  if(idx >= queue.length){
+    const acc = attempts ? (correct/attempts) : 0;
+    const ms = performance.now() - startedAt;
+    pushRank(acc, ms);
+    // リスタート
+    start();
+    return;
+  }
+  const sym = queue[idx];
+  $("#qSymbol").textContent = sym.char;
+
+  const names = SYMBOLS.map(s=>s.name).filter(n=>n!==sym.name);
+  const options = shuffle([sym.name, ...shuffle(names).slice(0,3)]); // 四択
+  const wrap = $("#choices"); wrap.innerHTML = "";
+  options.forEach(n=>{
+    const b=document.createElement("button"); b.textContent=n;
+    b.onclick = () => answer(n, sym.name, b);
+    wrap.appendChild(b);
+  });
+
+  $("#feedback").textContent = "";
+  $("#progress").textContent = `${idx+1}/${queue.length}`;
+  $("#acc").textContent = attempts ? `${Math.round(correct/attempts*100)}%` : "0%";
+}
+
+function answer(sel, ans, btn){
+  attempts++;
+  const ok = (sel === ans);
+  if(ok){ correct++; btn.classList.add("correct"); showJudge(true); }
+  else{ btn.classList.add("wrong"); showJudge(false); }
+  // 次へ
+  setTimeout(()=>{ idx++; next(); }, 700);
+}
+
+function showJudge(isOK){
+  const j = $("#judge"), m=$("#judgeMark");
+  m.textContent = isOK ? "◯" : "×";
+  m.style.color = isOK ? "var(--ok)" : "var(--ng)";
+  j.classList.add("show");
+  navigator.vibrate?.(isOK ? 20 : [10,40,20]);
+  setTimeout(()=> j.classList.remove("show"), 600);
+}
+
+// DOM が準備できてから開始（貼り替え時の実行漏れ対策）
+document.addEventListener("DOMContentLoaded", () => {
+  renderRank();
+  start();
+});
+</script>
+</body>
+</html>
