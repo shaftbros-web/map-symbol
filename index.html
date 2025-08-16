@@ -1,285 +1,64 @@
-<!DOCTYPE html><html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>地図記号5択ドリル — 文字版（タップで次へ）</title>
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <style>
-    :root{ --bg:#0b0f14; --panel:#0f1520; --ink:#e6edf3; --muted:#9aa4b2; --accent:#60a5fa; --ok:#22c55e; --ng:#ef4444; --btn:#1f2937; --btn2:#111827; --card:#0f172a; --shadow:0 10px 30px rgba(0,0,0,.25); }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;overscroll-behavior:none}
-    #wrap{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto;max-height:100dvh}
-    header,footer{background:var(--panel);padding:10px env(safe-area-inset-right,12px) 10px env(safe-area-inset-left,12px);border-bottom:1px solid #1f2937}
-    footer{border-top:1px solid #1f2937;border-bottom:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    header h1{margin:0;font-size:18px;letter-spacing:.02em}
-    header .sub{font-size:12px;color:var(--muted)}main{overflow:hidden;padding:10px}
-.board{max-width:640px;margin:0 auto;display:grid;gap:10px;height:100%}
-
-.card{background:var(--card);border:1px solid #1f2937;border-radius:16px;box-shadow:var(--shadow);padding:12px}
-.flex{display:flex;gap:12px;align-items:center}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.stat{background:var(--btn2);padding:8px;border-radius:12px;text-align:center;border:1px solid #1f2937}
-.stat .v{font-size:16px;font-weight:700}
-.stat .k{font-size:11px;color:var(--muted)}
-
-/* 1画面に収まるよう高さを調整 */
-#quizCard{display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;min-height:0}
-.q-symbol{display:grid;place-items:center;height:clamp(160px,36vh,320px);border-radius:16px;background:linear-gradient(180deg,#0d1625,#0b1220);border:1px solid #1e293b}
-.glyph{font-size:clamp(72px,14vh,120px);line-height:1}
-.q-meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;margin-top:4px}
-
-.choices{display:grid;gap:8px;grid-template-columns:1fr 1fr}
-@media(min-width:560px){.choices{grid-template-columns:1fr 1fr}}
-.choice{border:1px solid #1f2937;background:var(--btn);color:var(--ink);padding:12px;border-radius:14px;text-align:left;font-size:16px;display:flex;gap:10px;align-items:center;min-height:52px}
-.choice .idx{width:28px;height:28px;border-radius:8px;background:#0b1220;border:1px solid #1f2937;display:grid;place-items:center;font-weight:700}
-.choice.correct{outline:2px solid var(--ok);background:#0b1b12}
-.choice.wrong{outline:2px solid var(--ng);background:#1a0f12}
-.choice:disabled{opacity:.7}
-.explain{font-size:12px;color:var(--muted)}
-
-.controls{display:flex;gap:8px;flex-wrap:wrap}
-button{appearance:none;border:none;background:var(--accent);color:#041221;padding:10px 12px;border-radius:12px;font-weight:700}
-button.sec{display:none}
-button.warn{background:#1f2937;color:#fca5a5;border:1px solid #7f1d1d}
-
-.hidden{display:none !important}
-.rank{width:100%;border-collapse:collapse;font-size:14px}
-.rank th,.rank td{border-bottom:1px solid #1f2937;padding:8px}
-.rank th{color:var(--muted);font-weight:600;text-align:left}
-
-.tag{font-size:11px;color:#a3e635;background:#1a2b0f;border:1px solid #2c4a17;padding:2px 8px;border-radius:999px}
-
-/* 正誤オーバーレイ */
-#overlay{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.35);z-index:50}
-#overlay.show{display:grid}
-#overlayMark{font-size:18vh;font-weight:900;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))}
-#overlayHint{position:absolute;bottom:16px;font-size:12px;color:#cbd5e1}
-
-  </style>
-</head>
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>地図記号4択ドリル — 文字版（タップで次へ）</title>
+<style>
+  :root{--bg:#0b0f14;--panel:#0f1520;--ink:#e6edf3;--muted:#9aa4b2;--ok:#22c55e;--ng:#ef4444}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;height:100dvh;display:flex;flex-direction:column}
+  header,footer{background:#0f1520;padding:6px 10px;font-size:14px;text-align:center}
+  main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;overflow:hidden;padding:8px}
+  .symbol{font-size:clamp(72px,14vh,120px);margin:4px}
+  .choices{display:grid;gap:8px;width:100%;max-width:360px;grid-template-columns:1fr 1fr}
+  .choices button{padding:12px;border:none;border-radius:12px;background:#1f2937;color:var(--ink);font-size:16px}
+  .choices button.correct{background:#14532d}
+  .choices button.wrong{background:#7f1d1d}
+  #judge{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18vh;font-weight:900;opacity:0;transition:opacity .2s ease;pointer-events:none}
+  #judge.show{opacity:1}
+  details#rank{max-width:560px;margin:0 auto;padding:8px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{border-bottom:1px solid #1f2937;padding:6px;text-align:left}
+  th{color:#9aa4b2;font-weight:600}
+</style></head>
 <body>
-<div id="wrap">
-  <header>
-    <h1>地図記号5択ドリル <span class="sub">— 文字版・タップで次へ</span></h1>
-  </header>
-  <main>
-    <div class="board">
-      <section class="card" id="statsCard">
-        <div class="stats">
-          <div class="stat"><div class="v" id="statProgress">0/0</div><div class="k">進行状況</div></div>
-          <div class="stat"><div class="v" id="statAcc">0%</div><div class="k">正解率（総合）</div></div>
-          <div class="stat"><div class="v" id="statTime">00:00</div><div class="k">経過時間</div></div>
-          <div class="stat"><div class="v" id="statStage">初回</div><div class="k">ステージ</div></div>
-        </div>
-      </section><section class="card" id="quizCard">
-    <div class="q-symbol" id="qSymbol"></div>
-    <div class="q-meta"><div id="qCounter">—</div><div id="hint" class="tag hidden">不正解の復習モード</div></div>
-    <div class="choices" id="choices"></div>
-    <div id="feedback" class="explain"></div>
-    <div class="controls">
-      <button id="nextBtn" class="sec hidden">つぎへ ▶</button>
-      <button id="restartBtn" class="warn">最初から</button>
-    </div>
-  </section>
-
-  <section class="card hidden" id="finishCard">
-    <h2 style="margin-top:0">🎉 全問正解！クリア！</h2>
-    <p>総合正解率 <b id="finalAcc">—</b> ／ クリア時間 <b id="finalTime">—</b></p>
-    <div class="flex">
-      <label for="playerName">名前（ランキング用・任意）</label>
-      <input id="playerName" placeholder="例：TS" style="flex:1;padding:10px;border-radius:10px;border:1px solid #1f2937;background:#0b1220;color:var(--ink)"/>
-      <button id="saveScoreBtn">保存</button>
-    </div>
-    <div style="height:8px"></div>
-    <h3 style="margin:6px 0 0">🏆 ローカルランキング</h3>
-    <table class="rank" id="rankTable">
-      <thead><tr><th>#</th><th>名前</th><th>正解率</th><th>時間</th><th>日付</th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <div class="controls" style="margin-top:6px">
-      <button id="againBtn">もう一度</button>
-      <button id="clearRankBtn" class="warn">ランキングを消去</button>
-    </div>
-  </section>
-
-  <section class="card" id="aboutCard" style="max-height:20vh;overflow:auto">
-    <details>
-      <summary>使い方（タップで次へ・1画面最適化）</summary>
-      <ul>
-        <li>回答後は <b>画面どこでもタップ</b>で次の問題に進みます（Nextボタン不要）。</li>
-        <li>正誤は中央に <b>大きな ◯ / × オーバーレイ</b>で表示します。</li>
-        <li>スマホで1画面に収まるよう高さを自動調整します。</li>
-      </ul>
-    </details>
-  </section>
-</div>
-
-  </main>
-  <footer>
-    <span class="sub">© 2025 Map Drill — 文字版・単一HTML</span>
-  </footer>
-</div><!-- 正誤オーバーレイ --><div id="overlay"><div id="overlayMark">◯</div><div id="overlayHint">タップで次へ</div></div><script>
-// ========== データ（文字版） ==========
-const SYMBOLS = [
-  {id:'post',     name:'郵便局',         kind:'char', data:'〒'},
-  {id:'temple',   name:'寺院',           kind:'char', data:'卍'},
-  {id:'shrine',   name:'神社',           kind:'char', data:'⛩'},
-  {id:'school',   name:'学校',           kind:'char', data:'文'},
-  {id:'hospital', name:'病院',           kind:'char', data:'H'},
-  {id:'parking',  name:'駐車場',         kind:'char', data:'P'},
-  {id:'factory',  name:'工場',           kind:'char', data:'工'},
-  {id:'cityhall', name:'市役所',         kind:'char', data:'市'},
-  {id:'police',   name:'交番・警察署',   kind:'char', data:'交'},
-  {id:'station',  name:'駅',             kind:'char', data:'駅'},
-  {id:'mountain', name:'山頂',           kind:'char', data:'△'},
-  {id:'orchard',  name:'果樹園',         kind:'char', data:'果'},
-  {id:'tea',      name:'茶畑',           kind:'char', data:'茶'},
-  {id:'paddy',    name:'水田',           kind:'char', data:'田'},
-  {id:'field',    name:'畑',             kind:'char', data:'畑'},
-  {id:'lighthouse', name:'灯台',         kind:'char', data:'灯'},
+<header>地図記号4択ドリル — 文字版</header>
+<main>
+  <div class="symbol" id="qSymbol">?</div>
+  <div class="choices" id="choices"></div>
+  <div id="feedback" style="color:#9aa4b2;font-size:12px"></div>
+</main>
+<div id="judge"></div>
+<details id="rank">
+  <summary>🏆 ローカルランキング（自動記録：日時・正解率・時間）</summary>
+  <table>
+    <thead><tr><th>#</th><th>日時</th><th>正解率</th><th>時間</th></tr></thead>
+    <tbody id="rankBody"></tbody>
+  </table>
+</details>
+<footer><span id="progress">0/0</span> 正解率:<span id="acc">0%</span></footer>
+<script>
+const SYMBOLS=[
+ {id:'post',name:'郵便局',char:'〒'},
+ {id:'temple',name:'寺院',char:'卍'},
+ {id:'shrine',name:'神社',char:'⛩'},
+ {id:'school',name:'学校',char:'文'},
+ {id:'hospital',name:'病院',char:'H'},
+ {id:'parking',name:'駐車場',char:'P'},
+ {id:'factory',name:'工場',char:'工'},
+ {id:'cityhall',name:'市役所',char:'市'},
+ {id:'police',name:'交番・警察署',char:'交'},
+ {id:'station',name:'駅',char:'駅'},
+ {id:'mountain',name:'山頂',char:'△'},
+ {id:'orchard',name:'果樹園',char:'果'},
+ {id:'tea',name:'茶畑',char:'茶'},
+ {id:'paddy',name:'水田',char:'田'},
+ {id:'field',name:'畑',char:'畑'},
+ {id:'lighthouse',name:'灯台',char:'灯'}
 ];
-const ALL_NAMES = SYMBOLS.map(s=>s.name);
+const $=s=>document.querySelector(s);
+const shuffle=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);// ランキング（名前入力なし。日時・正解率・時間のみ） const LS_KEY='mapdrill_rank_char_v2'; function loadRank(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]')}catch{return []}} function saveRank(list){localStorage.setItem(LS_KEY,JSON.stringify(list))} function fmt2(n){return String(n).padStart(2,'0')} function fmtTime(ms){const t=Math.round(ms/1000);const m=Math.floor(t/60),s=t%60;return ${fmt2(m)}:${fmt2(s)}} function renderRank(){const tbody=$('#rankBody');tbody.innerHTML='';loadRank().forEach((r,i)=>{const tr=document.createElement('tr');const d=new Date(r.at);const when=${d.getFullYear()}/${fmt2(d.getMonth()+1)}/${fmt2(d.getDate())} ${fmt2(d.getHours())}:${fmt2(d.getMinutes())};tr.innerHTML=<td>${i+1}</td><td>${when}</td><td>${Math.round(r.acc*100)}%</td><td>${fmtTime(r.ms)}</td>;tbody.appendChild(tr)})} function pushRank(acc,ms){const list=loadRank();list.push({at:Date.now(),acc,ms});list.sort((a,b)=> (b.acc-a.acc)||(a.ms-b.ms));saveRank(list.slice(0,50));renderRank()}
 
-// ========== ユーティリティ ==========
-const $ = s => document.querySelector(s);
-const shuffle = arr => arr.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
-const pad2 = n => String(n).padStart(2,'0');
-const fmtTime = ms => { const t=Math.round(ms/1000); const m=Math.floor(t/60), s=t%60; return `${pad2(m)}:${pad2(s)}`; };
+let queue=[];let idx=0;let correct=0;let attempts=0;let startAt=0; function start(){queue=shuffle([...SYMBOLS]);idx=0;correct=0;attempts=0;startAt=performance.now();next()} function next(){if(idx>=queue.length){const acc=attempts?correct/attempts:0;const ms=performance.now()-startAt;pushRank(acc,ms);alert(クリア！ 正解率:${Math.round(acc*100)}%  時間:${fmtTime(ms)});start();return;} const sym=queue[idx];$('#qSymbol').textContent=sym.char; const names=SYMBOLS.map(s=>s.name).filter(n=>n!==sym.name); // 誤答候補 const opts=shuffle([sym.name,...shuffle(names).slice(0,3)]); // ← 四択（正解1 + 誤答3） const wrap=$('#choices');wrap.innerHTML=''; opts.forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>answer(n,sym.name,b);wrap.appendChild(b)}); $('#progress').textContent=(idx+1)+"/"+queue.length;$('#acc').textContent=(attempts?Math.round(correct/attempts*100):0)+"%"; } function answer(sel,ans,btn){attempts++;if(sel===ans){correct++;btn.classList.add('correct');showJudge('◯','var(--ok)')}else{btn.classList.add('wrong');showJudge('×','var(--ng)')} setTimeout(()=>{idx++;next()},700)} function showJudge(mark,color){const j=$('#judge');j.textContent=mark;j.style.color=color;j.classList.add('show');setTimeout(()=>j.classList.remove('show'),600)}
 
-// ========== 状態 ==========
-let queue = [];
-let wrongSet = new Set();
-let current = null; let idx = 0; let stage = 'first';
-let startAt = 0; let totalAttempts = 0; let totalCorrect = 0;
-const perItemAttempts = {};
-const LS_KEY = 'mapdrill_rank_v1_char_tap';
-let awaitingTap = false;
+renderRank(); start(); </script>
 
-function resetAll(){
-  queue = shuffle([...SYMBOLS]);
-  wrongSet.clear(); current = null; idx = 0; stage='first';
-  startAt = performance.now(); totalAttempts = 0; totalCorrect = 0;
-  SYMBOLS.forEach(s=>perItemAttempts[s.id] = {tries:0, correctOnce:false});
-  $('#finishCard').classList.add('hidden');
-  $('#quizCard').classList.remove('hidden');
-  $('#hint').classList.add('hidden');
-  $('#feedback').textContent = '';
-  renderStats();
-  nextQuestion();
-}
-
-function renderStats(){
-  $('#statProgress').textContent = `${idx}/${SYMBOLS.length}`;
-  const acc = totalAttempts? Math.round((totalCorrect/totalAttempts)*100) : 0;
-  $('#statAcc').textContent = `${acc}%`;
-  const elapsed = performance.now()-startAt;
-  $('#statTime').textContent = fmtTime(elapsed);
-  $('#statStage').textContent = (stage==='first'? '初回':'復習');
-  if(stage==='review') $('#hint').classList.remove('hidden');
-}
-
-function renderSymbol(sym){
-  const box = $('#qSymbol'); box.innerHTML = '';
-  const d = document.createElement('div'); d.className='glyph'; d.textContent = sym.data; box.appendChild(d);
-}
-
-function pickChoices(answerName){
-  const pool = ALL_NAMES.filter(n=>n!==answerName);
-  const picks = shuffle(pool).slice(0,4);
-  return shuffle([answerName, ...picks]);
-}
-
-function nextQuestion(){
-  if(idx >= queue.length){
-    if(stage==='first' && wrongSet.size>0){
-      queue = shuffle([...SYMBOLS.filter(s=>wrongSet.has(s.id))]);
-      wrongSet.clear(); stage='review'; idx=0; $('#hint').classList.remove('hidden');
-    }else{ finish(); return; }
-  }
-  current = queue[idx];
-  renderSymbol(current); $('#qCounter').textContent = `問題 ${idx+1} / ${queue.length}`;
-  $('#feedback').textContent = '';
-
-  const opts = pickChoices(current.name);
-  const wrap = $('#choices'); wrap.innerHTML = '';
-  opts.forEach((name,i)=>{
-    const btn = document.createElement('button');
-    btn.className = 'choice';
-    btn.innerHTML = `<span class="idx">${i+1}</span> <span>${name}</span>`;
-    btn.addEventListener('click',()=>onAnswer(btn, name));
-    wrap.appendChild(btn);
-  });
-  awaitingTap = false; $('#overlay').classList.remove('show');
-  renderStats();
-}
-
-function onAnswer(btn, chosenName){
-  if(!current) return; if(awaitingTap) return;
-  totalAttempts++; perItemAttempts[current.id].tries++;
-  const all = Array.from(document.querySelectorAll('.choice')); all.forEach(b=>b.disabled=true);
-  const correct = (chosenName === current.name);
-  const feedback = $('#feedback');
-
-  if(correct){
-    btn.classList.add('correct');
-    feedback.innerHTML = `✅ 正解：<b>${current.name}</b>`;
-    if(!perItemAttempts[current.id].correctOnce){ perItemAttempts[current.id].correctOnce = true; totalCorrect++; }
-    showOverlay(true); navigator.vibrate?.(20);
-  }else{
-    btn.classList.add('wrong');
-    const hit = Array.from(document.querySelectorAll('.choice')).find(b=>b.textContent.includes(current.name));
-    if(hit) hit.classList.add('correct');
-    feedback.textContent = `❌ 不正解：正しくは「${current.name}」`;
-    wrongSet.add(current.id); showOverlay(false); navigator.vibrate?.([10,40,20]);
-  }
-  renderStats();
-}
-
-function showOverlay(isOK){
-  const ov = $('#overlay'); const mark = $('#overlayMark');
-  mark.textContent = isOK ? '◯' : '×'; mark.style.color = isOK ? '#22c55e' : '#ef4444';
-  ov.classList.add('show'); awaitingTap = true;
-}
-function handleTap(){
-  if(!awaitingTap) return;
-  awaitingTap = false; $('#overlay').classList.remove('show'); idx++; nextQuestion();
-}
-window.addEventListener('pointerdown', handleTap);
-
-function finish(){
-  const elapsed = performance.now()-startAt;
-  $('#finalAcc').textContent = `${Math.round((totalCorrect/totalAttempts)*100)}%`;
-  $('#finalTime').textContent = fmtTime(elapsed);
-  renderRanking(); $('#quizCard').classList.add('hidden'); $('#finishCard').classList.remove('hidden');
-}
-
-function renderRanking(){
-  const tbody = $('#rankTable tbody'); tbody.innerHTML = '';
-  const list = loadRank(); list.forEach((r,i)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i+1}</td><td>${r.name||'-'}</td><td>${Math.round(r.acc*100)}%</td><td>${fmtTime(r.ms)}</td><td>${new Date(r.at).toLocaleDateString()}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-function loadRank(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch{return []} }
-function saveRank(list){ localStorage.setItem(LS_KEY, JSON.stringify(list)); }
-function pushScore(){
-  const name = $('#playerName').value.trim();
-  const ms = performance.now()-startAt; const acc = totalAttempts? (totalCorrect/totalAttempts) : 0;
-  const entry = {name, ms, acc, at: Date.now()};
-  const list = loadRank(); list.push(entry); list.sort((a,b)=> (b.acc-a.acc)||(a.ms-b.ms));
-  saveRank(list.slice(0,50)); renderRanking();
-}
-
-// ========== イベント ==========
-$('#restartBtn').addEventListener('click', ()=>{ if(confirm('最初からやり直しますか？')) resetAll(); });
-$('#againBtn').addEventListener('click', resetAll);
-$('#saveScoreBtn').addEventListener('click', pushScore);
-$('#clearRankBtn').addEventListener('click', ()=>{ if(confirm('ランキングを消去しますか？')){ localStorage.removeItem(LS_KEY); renderRanking(); }});
-setInterval(()=>{ if($('#quizCard')&&!$('#quizCard').classList.contains('hidden')) renderStats(); }, 1000);
-
-// 起動
-resetAll();
-</script></body>
-</html>
+</body></html>
