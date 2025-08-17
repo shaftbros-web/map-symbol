@@ -17,7 +17,148 @@
     opacity: 0; 
     pointer-events: none;
     z-index: 1000;
+  }<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>地図記号クイズ</title>
+<style>
+  body { font-family: sans-serif; text-align: center; margin: 20px; background:#f9fafb; }
+  #quiz { margin-top: 20px; }
+  .option { display:block; margin:10px auto; padding:10px; width:80%; max-width:300px; border:1px solid #333; border-radius:8px; background:#fff; }
+  #feedback { 
+    position: absolute; 
+    top: 15%; left: 50%; 
+    transform: translateX(-50%); 
+    font-size: 4rem; 
+    font-weight: bold; 
+    opacity: 0; 
+    pointer-events: none;
+    z-index: 1000;
   }
+  #feedback.correct { color: green; }
+  #feedback.incorrect { color: red; }
+  .controls { margin: 10px; }
+  label { margin: 0 10px; }
+</style>
+</head>
+<body>
+
+<h1>地図記号クイズ</h1>
+
+<div class="controls">
+  <label>
+    <input type="checkbox" id="mustCorrectSwitch">
+    正解するまで進む
+  </label>
+  <label>
+    <input type="checkbox" id="reviewSwitch" checked>
+    復習モードあり
+  </label>
+</div>
+
+<div id="quiz">
+  <img id="symbol" src="" alt="記号" style="width:120px; height:120px; display:block; margin:0 auto;">
+  <div id="options"></div>
+</div>
+
+<div id="feedback"></div>
+
+<script>
+const questions = [
+  {img:"symbols/school.svg", answer:"学校", options:["学校","郵便局","病院","図書館"]},
+  {img:"symbols/hospital.svg", answer:"病院", options:["寺","病院","消防署","工場"]},
+  {img:"symbols/postoffice.svg", answer:"郵便局", options:["役所","図書館","郵便局","発電所"]},
+];
+
+let currentIndex = 0;
+let reviewList = []; // 復習用
+let reviewing = false;
+
+const symbolEl = document.getElementById("symbol");
+const optionsEl = document.getElementById("options");
+const feedbackEl = document.getElementById("feedback");
+const mustCorrectSwitch = document.getElementById("mustCorrectSwitch");
+const reviewSwitch = document.getElementById("reviewSwitch");
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function loadQuestion() {
+  const q = questions[currentIndex];
+  symbolEl.src = q.img;
+  optionsEl.innerHTML = "";
+  shuffle(q.options).forEach(opt => {
+    const btn = document.createElement("button");
+    btn.textContent = opt;
+    btn.className = "option";
+    btn.onclick = () => checkAnswer(opt, q.answer);
+    optionsEl.appendChild(btn);
+  });
+}
+
+function showFeedback(correct) {
+  feedbackEl.textContent = correct ? "〇" : "×";
+  feedbackEl.className = correct ? "correct" : "incorrect";
+  feedbackEl.style.opacity = 1;
+  setTimeout(() => { feedbackEl.style.opacity = 0; }, 800);
+}
+
+function vibrate(ms) {
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
+
+function checkAnswer(selected, correct) {
+  if (selected === correct) {
+    showFeedback(true);
+    vibrate(200);
+
+    // 復習リストから削除
+    if (reviewing) {
+      reviewList = reviewList.filter(i => i !== currentIndex);
+    }
+
+    if (mustCorrectSwitch.checked) {
+      nextQuestion();
+    } else {
+      nextQuestion();
+    }
+  } else {
+    showFeedback(false);
+    vibrate([100,50,100]);
+
+    // 復習モードONなら登録
+    if (reviewSwitch.checked && !reviewList.includes(currentIndex)) {
+      reviewList.push(currentIndex);
+    }
+
+    if (!mustCorrectSwitch.checked) {
+      nextQuestion();
+    }
+  }
+}
+
+function nextQuestion() {
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
+  } else if (reviewSwitch.checked && reviewList.length > 0) {
+    reviewing = true;
+    currentIndex = reviewList[0];
+  } else {
+    alert("クイズ終了！");
+    return;
+  }
+  loadQuestion();
+}
+
+// 初期化
+loadQuestion();
+</script>
+</body>
+</html>
+
   #feedback.correct { color: green; }
   #feedback.incorrect { color: red; }
   .controls { margin: 10px; }
