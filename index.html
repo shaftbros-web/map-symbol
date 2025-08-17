@@ -16,47 +16,41 @@
     padding: 20px;
   }
   #symbol {
-    width: 120px;
-    height: 120px;
-    margin: 30px auto;
+    width: 100px;
+    height: 100px;
+    margin: 20px auto;
   }
   .options {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     margin: 20px auto;
-    max-width: 300px;
+    max-width: 280px;
   }
   button {
-    padding: 14px;
+    padding: 12px;
     font-size: 18px;
-    border-radius: 8px;
+    border-radius: 6px;
     border: none;
     background: #007bff;
     color: white;
   }
-  button:hover {
-    opacity: 0.9;
+  button:active {
+    transform: scale(0.97);
   }
   #feedback {
     position: fixed;
-    top: 40px;
+    top: 30px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 120px; /* ←もっと大きく */
+    font-size: 100px; /* ←大きくした */
     font-weight: bold;
     display: none;
     z-index: 1000;
     pointer-events: none;
   }
   #settings {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    background: white;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    margin-top: 20px;
   }
 </style>
 </head>
@@ -91,6 +85,16 @@ const forceCorrectEl = document.getElementById("forceCorrect");
 const reviewModeEl = document.getElementById("reviewMode");
 
 function loadQuiz() {
+  if (!reviewing && currentQuiz >= quizData.length) {
+    if (reviewList.length > 0 && reviewModeEl.checked) {
+      reviewing = true;
+      currentQuiz = 0;
+      alert("復習モード開始！");
+    } else {
+      alert("全問終了！");
+      return;
+    }
+  }
   let data = reviewing ? reviewList[currentQuiz] : quizData[currentQuiz];
   symbolEl.innerHTML = `<img src="${data.img}" alt="symbol" width="100%">`;
   optionsEl.innerHTML = "";
@@ -117,11 +121,7 @@ function checkAnswer(selected, correct) {
     } else {
       currentQuiz++;
     }
-    if (forceCorrectEl.checked) {
-      setTimeout(loadQuiz, 800);
-    } else {
-      setTimeout(loadQuiz, 800);
-    }
+    setTimeout(loadQuiz, 700);
   } else {
     showFeedback("×", "red");
     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
@@ -131,7 +131,7 @@ function checkAnswer(selected, correct) {
     }
     if (!forceCorrectEl.checked) {
       currentQuiz++;
-      setTimeout(loadQuiz, 800);
+      setTimeout(loadQuiz, 700);
     }
   }
 }
