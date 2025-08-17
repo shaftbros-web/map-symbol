@@ -6,7 +6,7 @@
   <title>地図記号4択ドリル — SVG版（全問正解まで）</title>
   <meta name="description" content="中学生向け：地図記号を4択で覚えるスマホ用WEBドリル。SVG読み込み、誤答復習、全問正解まで続行、ローカルランキング対応。" />
   <style>
-    :root{--bg:#0b0f14;--panel:#0f1520;--ink:#e6edf3;--muted:#9aa4b2;--ok:#22c55e;--ng:#ef4444}
+    :root{--bg:#0b0f14;--panel:#0f1520;--ink:#e6edf3;--muted:#9aa4b2;--ok:#16a34a;--ng:#ef4444}
     *{box-sizing:border-box}
     html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}
     body{min-height:100dvh;display:flex;flex-direction:column}
@@ -26,26 +26,6 @@
     .symbolBox .fallback{font-size:clamp(70px,14vh,120px);line-height:1}
     .imgSym{width:clamp(140px,34vh,260px);height:clamp(140px,34vh,260px);object-fit:contain}
 
-    /* フラッシュ判定（記号の上・短時間） */
-    #flash{
-      position:absolute; left:50%; top:10px; transform:translateX(-50%) translateY(-10px);
-      padding:6px 16px; border-radius:999px;
-      font-weight:900; letter-spacing:.08em;
-      font-size:clamp(28px,6vh,40px);
-      color:#0b0f14; background:#ffffff; border:2px solid #cbd5e1;
-      opacity:0; pointer-events:none; z-index:5;
-      filter:drop-shadow(0 6px 14px rgba(0,0,0,.18));
-    }
-    #flash.ok{border-color:var(--ok)}
-    #flash.ng{border-color:var(--ng)}
-    .showFlash{ animation: flashUp .7s ease forwards; }
-    @keyframes flashUp{
-      0%{opacity:0; transform:translateX(-50%) translateY(-8px)}
-      15%{opacity:1; transform:translateX(-50%) translateY(0)}
-      75%{opacity:1}
-      100%{opacity:0; transform:translateX(-50%) translateY(-10px)}
-    }
-
     .bar{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
     .tag{font-size:11px;color:#a3e635;background:#1a2b0f;border:1px solid #2c4a17;padding:2px 8px;border-radius:999px}
 
@@ -58,7 +38,28 @@
     .choices button.wrong{background:#7f1d1d}
     .choices button:disabled{opacity:.85;cursor:default}
 
-    #feedback{display:none} /* テキストの解答表示は使わない */
+    /* 超大型の判定表示（◯/×）：中央付近・ボタンにかぶらない（上寄り） */
+    #judge{
+      position:fixed;
+      left:50%;
+      top:32%;              /* ← ボタンにかぶらないようにやや上 */
+      transform:translate(-50%,-50%);
+      font-size:clamp(64px,12vh,120px);  /* もっと大きく！ */
+      font-weight:900;
+      color:#111;           /* 下地白で程よく見える濃グレー */
+      text-shadow:
+        0 0 2px #fff,
+        0 0 12px rgba(255,255,255,.9),
+        0 6px 18px rgba(0,0,0,.35);
+      letter-spacing:.08em;
+      opacity:0;
+      pointer-events:none;
+      z-index:9999;
+      transition:opacity .25s ease-out;
+    }
+    #judge.ok { color: var(--ok); }
+    #judge.ng { color: var(--ng); }
+    #judge.show { opacity:1; }
 
     /* 設定ボタン＆モーダル */
     .controls{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;align-items:center}
@@ -66,7 +67,7 @@
     .btn.warn{color:#fca5a5;border:1px solid #7f1d1d}
     .btn.ghost{background:#0b1220;border:1px solid #1f2937}
 
-    #settings{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.55);z-index:9999}
+    #settings{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.55);z-index:9998}
     #settings.show{display:grid}
     .sheet{background:#0f172a;border:1px solid #1f2937;border-radius:16px;min-width:min(94vw,520px);padding:16px}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0}
@@ -75,7 +76,7 @@
     .sheet .hd{font-weight:700;margin:0 0 6px 2px}
 
     /* クリア画面 */
-    #finish{position:fixed;inset:0;display:none;place-items:center;z-index:99999;background:rgba(0,0,0,.6)}
+    #finish{position:fixed;inset:0;display:none;place-items:center;z-index:10000;background:rgba(0,0,0,.6)}
     #finish.show{display:grid}
     .finishCard{background:#0f172a;border:1px solid #1f2937;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.4);padding:22px;min-width:min(94vw,560px);text-align:center}
     .big{font-size:clamp(28px,4.6vh,40px);margin:6px 0}
@@ -95,7 +96,6 @@
   <main>
     <div class="wrap">
       <div class="symbolBox">
-        <div id="flash" aria-hidden="true">◯</div>
         <img id="qImg" class="imgSym" alt="地図記号" />
         <div id="fallback" class="fallback" hidden>？</div>
       </div>
@@ -106,7 +106,7 @@
       </div>
 
       <div id="choices" class="choices"></div>
-      <div id="feedback"></div>
+      <div id="feedback" hidden></div>
 
       <div class="controls">
         <div style="display:flex;gap:10px">
@@ -118,14 +118,16 @@
     </div>
   </main>
 
-  <!-- 設定モーダル -->
+  <!-- 判定表示（大きい◯×） -->
+  <div id="judge" aria-hidden="true">◯</div>
+
+  <!-- 設定モーダル（2スイッチのみ） -->
   <div id="settings" role="dialog" aria-modal="true" aria-labelledby="stHd">
     <div class="sheet">
       <div class="hd" id="stHd">設定</div>
       <div class="row">
         <label><input type="checkbox" id="optRequireCorrect"> 正解するまで進まない</label>
         <label><input type="checkbox" id="optReview" checked> 復習モードあり</label>
-        <label><input type="checkbox" id="optShowFlash" checked> 判定表示（◯/×）</label>
       </div>
       <div class="row" style="justify-content:flex-end">
         <button id="closeSettings" class="btn">閉じる</button>
@@ -239,27 +241,23 @@ function renderRank(){
   });
 }
 
-// ===== オプション（デフォルト：正解不要=OFF、復習あり=ON、◯×表示=ON） =====
+// ===== オプション（デフォルト：正解不要=OFF、復習あり=ON） =====
 let requireCorrect = false;
 let reviewEnabled = true;
-let showFlash = true;
 function loadOpts(){
   try{
     const o = JSON.parse(localStorage.getItem(OPTS_KEY)||"{}");
     if(typeof o.requireCorrect === 'boolean') requireCorrect = o.requireCorrect;
     if(typeof o.reviewEnabled === 'boolean') reviewEnabled = o.reviewEnabled;
-    if(typeof o.showFlash === 'boolean') showFlash = o.showFlash;
   }catch{}
   $("#optRequireCorrect").checked = requireCorrect;
   $("#optReview").checked = reviewEnabled;
-  $("#optShowFlash").checked = showFlash;
 }
 function saveOpts(){
-  localStorage.setItem(OPTS_KEY, JSON.stringify({requireCorrect, reviewEnabled, showFlash}));
+  localStorage.setItem(OPTS_KEY, JSON.stringify({requireCorrect, reviewEnabled}));
 }
 $("#optRequireCorrect")?.addEventListener('change', (e)=>{ requireCorrect = e.target.checked; saveOpts(); });
 $("#optReview")?.addEventListener('change', (e)=>{ reviewEnabled = e.target.checked; saveOpts(); });
-$("#optShowFlash")?.addEventListener('change', (e)=>{ showFlash = e.target.checked; saveOpts(); });
 
 // ===== 状態 =====
 let queue=[], idx=0, attempts=0, correctClicks=0, startedAt=0;
@@ -327,15 +325,17 @@ function next(){
 function disableWrongButton(btn){ btn.disabled = true; btn.classList.add('wrong'); }
 function markCorrect(btn){ btn.classList.add('correct'); }
 
-/* 記号の上に短く◯/×を表示（約700ms）。 */
-function flashAboveSymbol(isOK){
-  if(!showFlash) return;
-  const f = $("#flash");
-  f.textContent = isOK ? "◯" : "×";
-  f.classList.remove('ok','ng','showFlash');
-  f.classList.add(isOK ? 'ok' : 'ng');
-  void f.offsetWidth; // restart animation
-  f.classList.add('showFlash');
+/* 超大型の◯/×を中央付近に短時間表示（約1.0秒） */
+function showJudge(isOK){
+  const j = $("#judge");
+  j.textContent = isOK ? "◯" : "×";
+  j.classList.remove('ok','ng','show');
+  j.classList.add(isOK ? 'ok' : 'ng');
+  // reflow でトランジション再実行
+  void j.offsetWidth;
+  j.classList.add('show');
+  // 1秒後に自動フェードアウト
+  setTimeout(()=> j.classList.remove('show'), 1000);
 }
 
 function answer(sel, sym, btnEl){
@@ -345,7 +345,7 @@ function answer(sel, sym, btnEl){
   // 端末バイブ（ユーザー操作直後）
   try{
     if (navigator.vibrate) {
-      navigator.vibrate(ok ? 25 : [12,40,18]);
+      navigator.vibrate(ok ? 28 : [14,60,18]);
     }
   }catch(e){}
 
@@ -353,18 +353,18 @@ function answer(sel, sym, btnEl){
     correctClicks++;
     markCorrect(btnEl);
     document.querySelectorAll('#choices button').forEach(b=>b.disabled=true);
-    flashAboveSymbol(true);
+    showJudge(true);
     setTimeout(()=>{ idx++; next(); }, 420);
   } else {
     if(reviewEnabled) wrongSet.add(sym.id);
     disableWrongButton(btnEl);
-    flashAboveSymbol(false);
+    showJudge(false);
     if(!requireCorrect){
       // 正解不要モード：不正解でも次へ
       document.querySelectorAll('#choices button').forEach(b=>b.disabled=true);
-      setTimeout(()=>{ idx++; next(); }, 480);
+      setTimeout(()=>{ idx++; next(); }, 500);
     }
-    // 正解必須モードならここで止まる（再挑戦）
+    // 正解必須モードならここで止めて再挑戦
   }
 
   // ステータス更新
