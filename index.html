@@ -3,7 +3,235 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>地図記号4択ドリル – SVG版（全問正解まで）</title><!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>地図記号4択ドリル – SVG版（全問正解まで）</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --fg: #e2e8f0;
+      --accent: #60a5fa;
+      --wrong: #ef4444;
+      --right: #22c55e;
+      --card: #1e293b;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    h1 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    #quiz {
+      background: var(--card);
+      padding: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    #qImg {
+      max-width: 200px;
+      max-height: 200px;
+      margin: 0 auto 1rem;
+      display: block;
+    }
+    #fallback {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .choices {
+      display: grid;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    button.choice {
+      padding: 0.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      background: var(--accent);
+      color: white;
+      transition: background 0.2s;
+    }
+    button.choice:hover {
+      background: #3b82f6;
+    }
+    .correct { background: var(--right) !important; }
+    .wrong { background: var(--wrong) !important; }
+    #restart {
+      padding: 0.5rem 1rem;
+      background: var(--wrong);
+      border: none;
+      border-radius: 0.5rem;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>地図記号4択ドリル – SVG版（全問正解まで）</h1>
+  <div id="quiz">
+    <img id="qImg" alt="記号" hidden />
+    <div id="fallback" hidden>？</div>
+    <div class="choices" id="choices"></div>
+    <button id="restart" hidden>最初から</button>
+  </div>
+
+  <script>
+    // === シンボル定義 ===
+    const SYMBOLS = [
+      {file:"postoffice.svg", name:"郵便局", fallback:"〒"},
+      {file:"nursing_home.svg", name:"老人ホーム", fallback:"老"},
+      {file:"hospital.svg", name:"病院", fallback:"病"},
+      {file:"school.svg", name:"小学校", fallback:"小"},
+      {file:"factory.svg", name:"工場", fallback:"工"},
+      {file:"library.svg", name:"図書館", fallback:"図"},
+      {file:"museum.svg", name:"博物館", fallback:"博"},
+      {file:"firestation.svg", name:"消防署", fallback:"消"},
+      {file:"police.svg", name:"警察署", fallback:"警"},
+      {file:"cityhall.svg", name:"市役所", fallback:"市"},
+      {file:"field.svg", name:"畑", fallback:"畑"},
+      {file:"orchard.svg", name:"果樹園", fallback:"果"},
+      {file:"tea.svg", name:"茶畑", fallback:"茶"},
+      {file:"mulberry.svg", name:"桑畑", fallback:"桑"},
+      {file:"paddy.svg", name:"田", fallback:"田"},
+      {file:"wasteland.svg", name:"荒地", fallback:"荒"},
+      {file:"conifer.svg", name:"針葉樹林", fallback:"林"},
+      {file:"broadleaf.svg", name:"広葉樹林", fallback:"森"},
+      {file:"lighthouse.svg", name:"灯台", fallback:"灯"},
+      {file:"temple.svg", name:"寺院", fallback:"寺"},
+      {file:"shrine.svg", name:"神社", fallback:"社"},
+      {file:"castle_ruins.svg", name:"城跡", fallback:"城"},
+      {file:"triangulation.svg", name:"三角点", fallback:"△"},
+      {file:"benchmark.svg", name:"水準点", fallback:"BM"}
+    ];
+
+    // === GitHub Pages & raw.githubusercontent フォールバック設定 ===
+    const REPO_USER = "shaftbros-web";
+    const REPO_NAME = "map-symbol";
+    const BASES = [
+      `https://${REPO_USER}.github.io/${REPO_NAME}/symbols/`,
+      `https://raw.githubusercontent.com/${REPO_USER}/${REPO_NAME}/main/symbols/`
+    ];
+
+    async function resolveUrlWithFallback(file){
+      for (const base of BASES){
+        try{
+          const url = base + file + `?t=${Date.now()}`;
+          const res = await fetch(url, {cache:"no-store", mode:"cors"});
+          if(res.ok){
+            return url;
+          }
+        }catch(_e){}
+      }
+      return null;
+    }
+
+    function preloadImages(){
+      const base = BASES[0];
+      SYMBOLS.forEach(s=>{
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = base + s.file;
+      });
+    }
+
+    async function renderSymbol(sym){
+      const img = document.getElementById("qImg");
+      const fb  = document.getElementById("fallback");
+      fb.hidden = true;
+      img.hidden = false;
+      img.alt = sym.name;
+
+      const url = await resolveUrlWithFallback(sym.file);
+      if(url){
+        img.src = url;
+        img.onerror = ()=>{
+          img.hidden = true;
+          fb.textContent = sym.fallback || "？";
+          fb.hidden = false;
+        };
+      }else{
+        img.hidden = true;
+        fb.textContent = (sym.fallback || "？") + "（記号が見つかりません）";
+        fb.hidden = false;
+      }
+    }
+
+    // === クイズ制御 ===
+    let current = 0;
+    let order = [];
+    let answeredCorrect = new Set();
+
+    function shuffle(a){ return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]); }
+
+    function nextQuestion(){
+      if(answeredCorrect.size === SYMBOLS.length){
+        document.getElementById("choices").innerHTML = "全問正解！おめでとうございます！";
+        document.getElementById("restart").hidden = false;
+        document.getElementById("qImg").hidden = true;
+        document.getElementById("fallback").hidden = true;
+        return;
+      }
+      do {
+        current = Math.floor(Math.random()*SYMBOLS.length);
+      } while(answeredCorrect.has(current));
+      renderSymbol(SYMBOLS[current]);
+
+      let choices = [SYMBOLS[current].name];
+      while(choices.length < 4){
+        let c = SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)].name;
+        if(!choices.includes(c)) choices.push(c);
+      }
+      choices = shuffle(choices);
+
+      const box = document.getElementById("choices");
+      box.innerHTML = "";
+      choices.forEach(c=>{
+        const b = document.createElement("button");
+        b.className="choice";
+        b.textContent = c;
+        b.onclick = ()=>{
+          if(c === SYMBOLS[current].name){
+            b.classList.add("correct");
+            answeredCorrect.add(current);
+            setTimeout(nextQuestion,500);
+          }else{
+            b.classList.add("wrong");
+          }
+        };
+        box.appendChild(b);
+      });
+    }
+
+    document.getElementById("restart").onclick = ()=>{
+      answeredCorrect.clear();
+      document.getElementById("restart").hidden = true;
+      nextQuestion();
+    };
+
+    preloadImages();
+    nextQuestion();
+  </script>
+</body>
+</html>
+
   <style>
     :root {
       --bg: #0f172a;
