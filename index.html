@@ -29,14 +29,14 @@
 
     #feedback{color:var(--muted);font-size:12px;min-height:16px}
 
-    /* 正誤オーバーレイ（タップで即次へ） */
-    #judge{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.35);z-index:50}
+    /* 正誤オーバーレイ（必ず最前面に） */
+    #judge{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.35);z-index:9999}
     #judge.show{display:grid}
     #judgeMark{font-size:18vh;font-weight:900;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))}
     #judgeHint{position:absolute;bottom:16px;font-size:12px;color:#cbd5e1}
 
     /* クリア画面（中央に大きく） */
-    #finish{position:fixed;inset:0;display:none;place-items:center;z-index:60;background:rgba(0,0,0,.6)}
+    #finish{position:fixed;inset:0;display:none;place-items:center;z-index:99999;background:rgba(0,0,0,.6)}
     #finish.show{display:grid}
     .finishCard{background:#0f172a;border:1px solid #1f2937;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.4);padding:22px;min-width:min(94vw,560px);text-align:center}
     .big{font-size:clamp(28px,4.6vh,40px);margin:6px 0}
@@ -214,10 +214,10 @@ function renderSymbol(sym){
   fb.hidden = true;
   img.hidden = false;
   img.alt = sym.name;
-  img.src = IMG_BASE + sym.file + `?v=${Date.now()}`; // cache bust (更新直後対策)
+  img.src = IMG_BASE + sym.file + `?v=${Date.now()}`; // cache bust
   img.onerror = ()=>{
     img.hidden = true;
-    fb.textContent = sym.fallback || '？';
+    fb.textContent = (sym.fallback || '？') + `（${IMG_BASE + sym.file} が読めません）`;
     fb.hidden = false;
   };
 }
@@ -277,8 +277,21 @@ function markButton(name, ok){
 function answer(sel, sym){
   attempts++;
   const ok = (sel === sym.name);
-  if(ok){ correctClicks++; markButton(sel, true); showJudge(true); }
-  else{ markButton(sel, false); wrongSet.add(sym.id); showJudge(false); }
+
+  // 画面下にも必ずフィードバック表示
+  const fb = $("#feedback");
+  if (ok) {
+    fb.innerHTML = `✅ 正解：<b>${sym.name}</b>`;
+    correctClicks++;
+    markButton(sel, true);
+    showJudge(true);
+  } else {
+    fb.textContent = `❌ 不正解：正しくは「${sym.name}」`;
+    wrongSet.add(sym.id);
+    markButton(sel, false);
+    showJudge(false);
+  }
+
   // 自動で次へ（0.7秒）／タップで即時進行
   setTimeout(()=>{ if(canAdvance){ idx++; next(); } }, 700);
 }
@@ -287,7 +300,8 @@ function showJudge(isOK){
   const j = $("#judge"), m=$("#judgeMark");
   m.textContent = isOK ? "◯" : "×";
   m.style.color = isOK ? "var(--ok)" : "var(--ng)";
-  j.classList.add("show");
+  j.style.display = "grid";    // 念のため直接指定
+  j.classList.add("show");     // 最前面に出す
   canAdvance = true;
   navigator.vibrate?.(isOK ? 20 : [10,40,20]);
 }
@@ -314,16 +328,14 @@ $("#clearRankBtn").addEventListener('click', ()=>{ if(confirm('ランキング�
 $("#preloadBtn").addEventListener('click', preloadImages);
 
 // 回答後は「画面どこでもタップで次へ」
-document.addEventListener('click', (e)=>{
+document.addEventListener('click', ()=>{
   if($("#finish").classList.contains('show')) return; // クリア画面中は無効
   if($("#judge").classList.contains('show') && canAdvance){
     $("#judge").classList.remove("show");
+    $("#judge").style.display = "none";
     idx++; next();
   }
 });
-// オーバーレイ外すタイマー（念のため保険）
-setInterval(()=>{ if($("#judge").classList.contains('show') && canAdvance){ /* no-op */ }}, 1200);
-
 // タイマー表示（1秒毎）
 setInterval(()=>{ 
   const playing = !$("#finish").classList.contains('show');
